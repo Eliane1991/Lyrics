@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9059" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9059"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9060"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="AppController" customModule="LyricsX" customModuleProvider="target">
@@ -90,19 +90,35 @@
                         <action selector="showPreferences:" target="-2" id="OHZ-tL-sQF"/>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="lfR-h4-Fcs"/>
-                <menuItem title="It's In Full Screen" id="REF-TU-uaB">
+                <menuItem isSeparatorItem="YES" id="txX-dr-HGn"/>
+                <menuItem title="Switch to Vertical Lyrics(beta)" id="k4O-V6-WJe">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="handleWorkSpaceChange:" target="-2" id="S5S-yQ-Doe"/>
-                        <binding destination="Ppe-ZY-ULn" name="enabled" keyPath="values.LyricsUseAutoLayout" id="kin-tO-CGe">
+                        <action selector="changeLyricsMode:" target="-2" id="KN2-LZ-Uk5"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Lower Lyrics" id="UNY-Ob-RmT">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="handleWorkSpaceChange:" target="-2" id="lLA-li-Fau"/>
+                        <binding destination="Ppe-ZY-ULn" name="enabled2" keyPath="values.LyricsIsVerticalLyrics" previousBinding="HKw-4B-8oq" id="0Hg-1Y-hX6">
+                            <dictionary key="options">
+                                <integer key="NSMultipleValuesPlaceholder" value="-1"/>
+                                <integer key="NSNoSelectionPlaceholder" value="-1"/>
+                                <integer key="NSNotApplicablePlaceholder" value="-1"/>
+                                <integer key="NSNullPlaceholder" value="-1"/>
+                                <bool key="NSRaisesForNotApplicableKeys" value="NO"/>
+                                <string key="NSValueTransformerName">NSNegateBoolean</string>
+                            </dictionary>
+                        </binding>
+                        <binding destination="Ppe-ZY-ULn" name="enabled" keyPath="values.LyricsUseAutoLayout" id="HKw-4B-8oq">
                             <dictionary key="options">
                                 <bool key="NSRaisesForNotApplicableKeys" value="NO"/>
                             </dictionary>
                         </binding>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="zet-Go-5yF"/>
+                <menuItem isSeparatorItem="YES" id="lfR-h4-Fcs"/>
                 <menuItem title="About Lyrics..." id="QoB-2y-8a4">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>

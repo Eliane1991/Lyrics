@@ -57,7 +57,6 @@ class AppController: NSObject {
         
         NSBundle(forClass: object_getClass(self)).loadNibNamed("StatusMenu", owner: self, topLevelObjects: nil)
         setupStatusItem()
-        statusBarMenu.itemAtIndex(6)?.image = NSImage(named: "red_dot")
         
         lyricsWindow=LyricsWindowController()
         lyricsWindow.showWindow(nil)
@@ -82,8 +81,6 @@ class AppController: NSObject {
         let ndc = NSDistributedNotificationCenter.defaultCenter()
         ndc.addObserver(self, selector: "iTunesPlayerInfoChanged:", name: "com.apple.iTunes.playerInfo", object: nil)
         ndc.addObserver(self, selector: "handleLrcSeekerEvent:", name: "LrcSeekerEvents", object: nil)
-        
-        NSWorkspace.sharedWorkspace().notificationCenter.addObserver(self, selector: "handleWorkSpaceChange:", name: NSWorkspaceActiveSpaceDidChangeNotification, object: nil)
         
         currentLyrics = "LyricsX"
         if iTunes.running() && iTunes.playing() {
@@ -111,6 +108,7 @@ class AppController: NSObject {
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
         NSDistributedNotificationCenter.defaultCenter().removeObserver(self)
+        NSWorkspace.sharedWorkspace().notificationCenter.removeObserver(self)
     }
     
     func setupStatusItem() {
@@ -122,6 +120,12 @@ class AppController: NSObject {
         statusBarItem.menu=statusBarMenu
         delayMenuItem.view=lyricsDelayView
         lyricsDelayView.autoresizingMask=[.ViewWidthSizable]
+        
+        if userDefaults.boolForKey(LyricsIsVerticalLyrics) {
+            statusBarMenu.itemAtIndex(6)?.title = NSLocalizedString("HORIZONTAL", comment: "")
+        } else {
+            statusBarMenu.itemAtIndex(6)?.title = NSLocalizedString("VERTICAL", comment: "")
+        }
     }
     
     func checkSavingPath() -> Bool{
@@ -149,6 +153,32 @@ class AppController: NSObject {
     }
     
 // MARK: - Interface Methods
+    
+    @IBAction func handleWorkSpaceChange(sender:AnyObject?) {
+        //before finding the way to detect full screen, user should adjust lyrics by selves
+        lyricsWindow.isFullScreen = !lyricsWindow.isFullScreen
+        if lyricsWindow.isFullScreen {
+            statusBarMenu.itemAtIndex(7)?.title = NSLocalizedString("HIGHER_LYRICS", comment: "")
+        } else {
+            statusBarMenu.itemAtIndex(7)?.title = NSLocalizedString("LOWER_LYRICS", comment: "")
+        }
+        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+            self.lyricsWindow.reflash()
+        }
+    }
+    
+    @IBAction func changeLyricsMode(sender:AnyObject?) {
+        let isVertical = !userDefaults.boolForKey(LyricsIsVerticalLyrics)
+        userDefaults.setObject(NSNumber(bool: isVertical), forKey: LyricsIsVerticalLyrics)
+        if isVertical {
+            statusBarMenu.itemAtIndex(6)?.title = NSLocalizedString("HORIZONTAL", comment: "")
+        } else {
+            statusBarMenu.itemAtIndex(6)?.title = NSLocalizedString("VERTICAL", comment: "")
+        }
+        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+            self.lyricsWindow.reflash()
+        }
+    }
     
     @IBAction func showPreferences(sender:AnyObject?) {
         let prefs = AppPrefsWindowController.sharedPrefsWindowController()
@@ -231,6 +261,15 @@ class AppController: NSObject {
             } catch let theError as NSError {
                 lrcContents = nil
                 NSLog("%@", theError.localizedDescription)
+                
+                // Error must be the text encoding thing.
+                if !userDefaults.boolForKey(LyricsDisableAllAlert) {
+                    let alert: NSAlert = NSAlert()
+                    alert.messageText = NSLocalizedString("UNSUPPORTED_ENCODING", comment: "")
+                    alert.informativeText = NSLocalizedString("ONLY_UTF8", comment: "")
+                    alert.addButtonWithTitle(NSLocalizedString("OK", comment: ""))
+                    alert.runModal()
+                }
                 return
             }
             if lrcContents != nil && testLrc(lrcContents) {
@@ -287,10 +326,10 @@ class AppController: NSObject {
     @IBAction func wrongLyrics(sender: AnyObject) {
         if !userDefaults.boolForKey(LyricsDisableAllAlert) {
             let alert: NSAlert = NSAlert()
-            alert.messageText = NSLocalizedString("CONFIRM_SIGN_WRONG", comment: "")
+            alert.messageText = NSLocalizedString("CONFIRM_MARK_WRONG", comment: "")
             alert.informativeText = NSLocalizedString("CANT_UNDONE", comment: "")
             alert.addButtonWithTitle(NSLocalizedString("CANCEL", comment: ""))
-            alert.addButtonWithTitle(NSLocalizedString("SIGN", comment: ""))
+            alert.addButtonWithTitle(NSLocalizedString("MARK", comment: ""))
             let response: NSModalResponse = alert.runModal()
             if response == NSAlertFirstButtonReturn {
                 return
@@ -445,6 +484,8 @@ class AppController: NSObject {
             return
         }
         
+        //the regex below should only use when the string doesn't contain time-tags
+        //because all time-tags would be matched as well.
         do {
             regexForIDTag = try NSRegularExpression(pattern: "\\[.*:.*\\]", options: [])
         } catch let theError as NSError {
@@ -525,6 +566,9 @@ class AppController: NSObject {
     func handlePositionChange (playerPosition: Int) {
         let tempLyricsArray = lyricsArray
         var index: Int
+        
+        //1.Find the first lyrics which time position is larger than current position, and its index is "index"
+        //2.The index of first-line-lyrics which needs to display is "index - 1"
         for index=0; index < tempLyricsArray.count; ++index {
             if playerPosition < tempLyricsArray[index].msecPosition - timeDly {
                 if index-1 == -1 {
@@ -574,7 +618,7 @@ class AppController: NSObject {
         }
         lrcSourceHandleQueue.cancelAllOperations()
         
-        //Search in the net if local lrc is nil or invalid
+        //Search in the Net if local lrc is nil or invalid
         let loadingSongID: String = currentSongID.copy() as! String
         let loadingArtist: String = currentArtist.copy() as! String
         let loadingTitle: String = currentSongTitle.copy() as! String
@@ -583,20 +627,13 @@ class AppController: NSObject {
         let artistForSearching: String = self.delSpecificSymbol(loadingArtist) as String
         let titleForSearching: String = self.delSpecificSymbol(loadingTitle) as String
         
+        //千千静听不支持繁体中文搜索，先转成简体中文。搜歌词组件参数是iTunes中显示的歌曲名
+        //歌手名以及iTunes的唯一编号（防止歌曲变更造成的歌词对错歌），以及用于搜索用的歌曲
+        //名与歌手名。另外，天天动听只会获取歌词文本，其他歌词源都是获取歌词URL
         qianqian.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: convertToSC(titleForSearching) as String, andArtistForSearching: convertToSC(artistForSearching) as String)
         xiami.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: titleForSearching, andArtistForSearching: artistForSearching)
         ttpod.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: titleForSearching, andArtistForSearching: artistForSearching)
         geciMe.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: titleForSearching, andArtistForSearching: artistForSearching)
-    }
-    
-    @IBAction func handleWorkSpaceChange(sender: AnyObject?) {
-        lyricsWindow.isFullScreen = !lyricsWindow.isFullScreen
-        if lyricsWindow.isFullScreen {
-            statusBarMenu.itemAtIndex(6)?.image = NSImage(named: "green_dot")
-        } else {
-            statusBarMenu.itemAtIndex(6)?.image = NSImage(named: "red_dot")
-        }
-        lyricsWindow.reflash()
     }
     
     func handleUserEditLyrics(n: NSNotification) {
@@ -619,6 +656,7 @@ class AppController: NSObject {
     
     
     func handleLrcDelayChange () {
+        //save the delay change to file.
         if lyricsArray.count == 0{
             return
         }
@@ -640,6 +678,8 @@ class AppController: NSObject {
     func handleLrcSeekerEvent (n:NSNotification) {
         NSLog("Recieved notification from LrcSeeker")
         let userInfo = n.userInfo
+        
+        //no playing track?
         if currentSongID == "" {
             let notification: NSUserNotification = NSUserNotification()
             notification.title = NSLocalizedString("NO_PLAYING_TRACK", comment: "")
@@ -743,8 +783,10 @@ class AppController: NSObject {
             return
         }
         
+        var hasLrc: Bool
         if lyricsContents == nil || !testLrc(lyricsContents) {
             NSLog("better lrc not found or it's not lrc file,trying others")
+            hasLrc = false
             lyricsContents = nil
             hasBetterLrc = false
             for lrc in serverLrcs {
@@ -757,13 +799,15 @@ class AppController: NSObject {
                     continue
                 }
                 if lyricsContents != nil && testLrc(lyricsContents) {
+                    hasLrc = true
                     break
                 }
             }
         } else {
+            hasLrc = true
             hasBetterLrc = true
         }
-        if lyricsContents != nil {
+        if hasLrc {
             if songID == currentSongID {
                 parsingLrc(lyricsContents)
             }

@@ -74,7 +74,6 @@ class LyricsWindowController: NSWindowController {
         backgroundLayer.addSublayer(secondLyricsLayer)
         setAttributes()
         setScreenResolution()
-        backgroundLayer.speed = 0.8
         displayLyrics("LyricsX", secondLyrics: nil)
         
         let nc:NSNotificationCenter = NSNotificationCenter.defaultCenter()
@@ -96,6 +95,7 @@ class LyricsWindowController: NSWindowController {
         let font:NSFont = NSFont(name: userDefaults.stringForKey(LyricsFontName)!, size: textSize)!
         
         attrs=[NSFontAttributeName:font]
+        attrs[NSForegroundColorAttributeName] = textColor
         
         backgroundLayer.backgroundColor = bkColor.CGColor
         
@@ -110,6 +110,12 @@ class LyricsWindowController: NSWindowController {
         if userDefaults.boolForKey(LyricsShadowModeEnable) {
             let shadowColor:NSColor = NSKeyedUnarchiver.unarchiveObjectWithData(userDefaults.objectForKey(LyricsShadowColor) as! NSData) as! NSColor
             let shadowRadius:CGFloat = CGFloat(userDefaults.floatForKey(LyricsShadowRadius))
+            
+            let shadow:NSShadow = NSShadow()
+            shadow.shadowColor = shadowColor
+            shadow.shadowBlurRadius = shadowRadius
+            attrs[NSShadowAttributeName] = shadow
+            
             firstLyricsLayer.shadowColor = shadowColor.CGColor
             firstLyricsLayer.shadowRadius = shadowRadius
             firstLyricsLayer.shadowOpacity = 1
@@ -139,12 +145,21 @@ class LyricsWindowController: NSWindowController {
 // MARK: - display lyrics methods
     
     func displayLyrics(theFirstLyrics:NSString?, secondLyrics theSecondLyrics:NSString?) {
-        
         firstLyrics = theFirstLyrics
         secondLyrics = theSecondLyrics
         
+        backgroundLayer.transform = CATransform3DMakeRotation(0, 0, 0, 1)
+        
+        if userDefaults.boolForKey(LyricsIsVerticalLyrics) {
+            displayVerticalLyrics()
+        } else {
+            displayHorizontalLyrics()
+        }
+    }
+    
+    func displayHorizontalLyrics() {
         if (firstLyrics==nil) || (firstLyrics?.isEqualToString(""))! {
-            // first Lyrics empty means it's instrument time
+            // first Lyrics empty means it's in instrumental time
             
             flag = true
             backgroundLayer.speed=0.2
@@ -155,17 +170,17 @@ class LyricsWindowController: NSWindowController {
             secondLyricsLayer.frame = NSMakeRect(backgroundLayer.frame.size.width/3, 0, 0, 0)
             firstLyricsLayer.string = ""
             secondLyricsLayer.string = ""
-            firstLyricsLayer.hidden=true
-            secondLyricsLayer.hidden=true
-            backgroundLayer.hidden=true
+            firstLyricsLayer.hidden = true
+            secondLyricsLayer.hidden = true
+            backgroundLayer.hidden = true
         }
         else if (secondLyrics==nil) || (secondLyrics?.isEqualToString(""))! {
-            // One-Line Mode or sencond lyrics is instrument time
+            // One-Line Mode or sencond lyrics is in instrumental time
             
             flag = true
-            backgroundLayer.speed = 0.8
-            firstLyricsLayer.speed = 0.8
-            secondLyricsLayer.speed = 0.8
+            backgroundLayer.speed = 1
+            firstLyricsLayer.speed = 1
+            secondLyricsLayer.speed = 1
             
             secondLyricsLayer.string = ""
             firstLyricsLayer.hidden = false
@@ -189,8 +204,8 @@ class LyricsWindowController: NSWindowController {
                 
                 backgroundLayer.frame=CGRectMake(x, y, frameSize.width, frameSize.height)
                 firstLyricsLayer.frame=CGRectMake(0, 0, frameSize.width, frameSize.height)
-            } else {
-                
+            }
+            else {
                 let frameSize = NSMakeSize(CGFloat(userDefaults.integerForKey(LyricsConstWidth)), CGFloat(userDefaults.integerForKey(LyricsConstHeight)))
                 x = CGFloat(userDefaults.integerForKey(LyricsConstToLeft))
                 y = CGFloat(userDefaults.integerForKey(LyricsConstToBottom))
@@ -203,9 +218,9 @@ class LyricsWindowController: NSWindowController {
         }
         else {
             // Two-Line Mode
-            backgroundLayer.speed = 0.8
-            firstLyricsLayer.speed = 0.8
-            secondLyricsLayer.speed = 0.8
+            backgroundLayer.speed = 1
+            firstLyricsLayer.speed = 1
+            secondLyricsLayer.speed = 1
             
             firstLyricsLayer.hidden=false
             secondLyricsLayer.hidden=false
@@ -282,9 +297,69 @@ class LyricsWindowController: NSWindowController {
         }
     }
     
+    func displayVerticalLyrics() {
+        //Current vertical lyrics mode is not perfect, it should be implemented by core text.
+        if (firstLyrics==nil) || (firstLyrics?.isEqualToString(""))! {
+            // first Lyrics empty means it's in instrumental time
+            
+            flag = true
+            backgroundLayer.speed=0.2
+            firstLyricsLayer.speed = 0.2
+            secondLyricsLayer.speed = 0.2
+            
+            firstLyricsLayer.frame = NSMakeRect(backgroundLayer.frame.size.width/3, 0, 0, 0)
+            secondLyricsLayer.frame = NSMakeRect(backgroundLayer.frame.size.width/3, 0, 0, 0)
+            firstLyricsLayer.string = ""
+            secondLyricsLayer.string = ""
+            firstLyricsLayer.hidden = true
+            secondLyricsLayer.hidden = true
+            backgroundLayer.hidden = true
+        }
+        else {
+            //one line mode
+            flag = true
+            backgroundLayer.speed = 1
+            firstLyricsLayer.speed = 1
+            secondLyricsLayer.speed = 1
+            
+            secondLyricsLayer.string = ""
+            firstLyricsLayer.hidden = false
+            secondLyricsLayer.hidden = true
+            backgroundLayer.hidden = false
+            
+            let attributedStr: NSMutableAttributedString = NSMutableAttributedString(string: firstLyrics as! String, attributes: attrs)
+            attributedStr.addAttribute(kCTVerticalFormsAttributeName as String, value: NSNumber(bool: true), range: NSMakeRange(0, attributedStr.length))
+            
+            let strSize:NSSize = attributedStr.size()
+            let frameSize = NSMakeSize(strSize.width+50, strSize.height)
+            let heightWithDock = visibleOrigin.y + visibleSize.height
+            let x: CGFloat
+            let y: CGFloat
+            
+            var deltaH = heightWithDock - frameSize.width
+            if deltaH < 0 {
+                deltaH = 8
+            }
+            y = heightWithDock - deltaH/2
+            
+            if userDefaults.integerForKey(LyricsVerticalLyricsPosition) == 0 {
+                x = 0
+            } else {
+                x = visibleSize.width - frameSize.height
+            }
+            
+            backgroundLayer.frame = CGRectMake(x, y, frameSize.width, frameSize.height)
+            firstLyricsLayer.frame = CGRectMake(0, -frameSize.height/4, frameSize.width, frameSize.height)
+            
+            backgroundLayer.transform = CATransform3DMakeRotation(CGFloat(-M_PI_2), 0, 0, 1)
+            
+            firstLyricsLayer.string=attributedStr
+        }
+    }
+    
     func reflash () {
-        self.flag = !self.flag
-        self.displayLyrics(self.firstLyrics, secondLyrics: self.secondLyrics)
+        flag = !flag
+        displayLyrics(firstLyrics, secondLyrics: secondLyrics)
     }
 
 //MARK: - Notification Methods
@@ -302,5 +377,5 @@ class LyricsWindowController: NSWindowController {
             self.reflash()
         }
     }
-
+    
 }

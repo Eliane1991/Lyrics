@@ -17,9 +17,13 @@
 "REVERT_LEAVE"="Revert and Leave";
 "CANCEL"="Cancel";
 
-"CONFIRM_SIGN_WRONG"="Are you sure to sign the lyrics wrong and delete?";
+"CONFIRM_MARK_WRONG"="Are you sure to mark the lyrics wrong and delete?";
 "CANT_UNDONE"="This operation can NOT be undone!";
-"SIGN"="Delete Lyrics and Sign";
+"MARK"="Delete Lyrics and Mark";
+
+"UNSUPPORTED_ENCODING"="Unsupported Text Encoding";
+"ONLY_UTF8"="LyricsX only supports UTF-8 Encoding, and more encoding in the future updates.";
+"OK"="OK";
 
 // Prefs Toolbar Identifier
 "GENERAL"="General";
@@ -36,3 +40,10 @@
 // Notification
 "NO_PLAYING_TRACK"="No Playing Track";
 "IGNORE_LYRICS"="Ignored lyrics from LrcSeeker.";
+
+// menu bar
+"HIGHER_LYRICS"="Higher Lyrics";
+"LOWER_LYRICS"="Lower Lyrics";
+"VERTICAL"="Switch to Vertical Lyrics(beta)";
+"HORIZONTAL"="Switch to Horizontal Lyrics";
+
