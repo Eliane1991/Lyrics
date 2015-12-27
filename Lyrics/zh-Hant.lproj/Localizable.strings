@@ -28,6 +28,7 @@
 "GENERAL"="通用";
 "LYRICS"="歌詞";
 "FONT_COLOR"="字型與顏色";
+"SHORTCUT"="快捷鍵";
 "DONATE"="捐贈";
 
 // TextPreview
@@ -45,3 +46,9 @@
 "LOWER_LYRICS"="降低歌詞位置";
 "VERTICAL"="使用縱向歌詞模式(beta)";
 "HORIZONTAL"="使用橫向歌詞模式";
+
+// Message Window
+"OFFSET"="歌詞偏移: %d";
+"DESKTOP_ON"="桌面歌詞開啟";
+"MENU_BAR_ON"="選單欄歌詞開啟";
+"BOTH_ON"="桌面與選單欄歌詞開啟";

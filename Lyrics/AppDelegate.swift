@@ -10,42 +10,52 @@ import Cocoa
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-
-    var applicationController: AppController!
     
     func applicationDidFinishLaunching(aNotification: NSNotification) {
-        
         let userSavingPath: NSString = NSSearchPathForDirectoriesInDomains(.DownloadsDirectory, [.UserDomainMask], true).first! 
         
         let userDefaults: [String:AnyObject] = [
+            //Menu
+            LyricsDesktopLyricsEnabled : NSNumber(bool: true),
+            LyricsMenuBarLyricsEnabled : NSNumber(bool: false),
+            LyricsIsVerticalLyrics : NSNumber(bool: false),
+            
+            //General Preferences Defaults
             LyricsSavingPathPopUpIndex : NSNumber(integer: 0),
             LyricsUserSavingPath : userSavingPath,
             LyricsAutoLaunches : NSNumber(bool: true),
             LyricsLaunchTpyePopUpIndex : NSNumber(integer: 2),
-            LyricsAutoConvertChinese : NSNumber(bool: false),
-            LyricsChineseTypeIndex : NSNumber(integer: 0),
+            LyricsServerIndex : NSNumber(integer: 0),
             LyricsQuitWithITunes : NSNumber(bool: false),
-            LyricsDisabledWhenPaused : NSNumber(bool: true),
-            LyricsDisabledWhenSreenShot : NSNumber(bool: true),
-            LyricsShadowModeEnable : NSNumber(bool: true),
-            LyricsIsVerticalLyrics : NSNumber(bool: false),
-            LyricsVerticalLyricsPosition : NSNumber(integer: 1),
-            LyricsTwoLineMode : NSNumber(bool: true),
-            LyricsSearchForBetterLrc : NSNumber(bool: true),
             LyricsDisableAllAlert : NSNumber(bool: false),
-            LyricsDisplayInAllSpaces: NSNumber(bool: true),
             LyricsUseAutoLayout : NSNumber(bool: true),
             LyricsHeightFromDockToLyrics : NSNumber(integer: 15),
             LyricsConstToLeft : NSNumber(integer: 50),
             LyricsConstToBottom : NSNumber(integer: 100),
             LyricsConstWidth : NSNumber(integer: 1000),
             LyricsConstHeight : NSNumber(integer: 60),
+            
+            //Lyrics Preferences Defaults
+            LyricsAutoConvertChinese : NSNumber(bool: false),
+            LyricsVerticalLyricsPosition : NSNumber(integer: 1),
+            LyricsChineseTypeIndex : NSNumber(integer: 0),
+            LyricsTwoLineMode : NSNumber(bool: true),
+            LyricsTwoLineModeIndex : NSNumber(integer: 0),
+            LyricsDisabledWhenPaused : NSNumber(bool: true),
+            LyricsDisabledWhenSreenShot : NSNumber(bool: true),
+            LyricsSearchForDiglossiaLrc : NSNumber(bool: true),
+            LyricsDisplayInAllSpaces: NSNumber(bool: true),
+            
+            //Font and Color Preferences Defaults
             LyricsFontName : "HannotateSC-W7",
             LyricsFontSize : NSNumber(float: 36),
+            LyricsShadowModeEnable : NSNumber(bool: true),
             LyricsTextColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor.whiteColor()),
             LyricsBackgroundColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor(calibratedWhite: 0, alpha: 0.5)),
             LyricsShadowColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor.yellowColor()),
-            LyricsShadowRadius : NSNumber(float: 4)
+            LyricsShadowRadius : NSNumber(float: 4),
+            LyricsBgHeightINCR : NSNumber(float: 0),
+            LyricsYOffset : NSNumber(float: 0)
         ]
         
         NSUserDefaults.standardUserDefaults().registerDefaults(userDefaults)
@@ -57,13 +67,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             helper.terminate()
         }
         
-        applicationController = AppController()
+        // Force Singleton to init
+        AppController.sharedAppController
+        // Force Prefs to load and setup shortcuts
+        let prefs = AppPrefsWindowController.sharedPrefsWindowController()
+        prefs.showWindow(nil)
+        prefs.window?.orderOut(nil)
     }
     
     func applicationWillTerminate(aNotification: NSNotification) {
-        if applicationController.timeDly != applicationController.timeDlyInFile {
+        let appController = AppController.sharedAppController
+        if appController.timeDly != appController.timeDlyInFile {
             NSLog("App terminating, saveing lrc time delay change...")
-            applicationController.handleLrcDelayChange()
+            appController.handleLrcDelayChange()
         }
         
         let userDefaults = NSUserDefaults.standardUserDefaults()

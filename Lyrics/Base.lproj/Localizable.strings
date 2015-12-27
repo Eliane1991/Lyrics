@@ -29,6 +29,7 @@
 "GENERAL"="General";
 "LYRICS"="Lyrics";
 "FONT_COLOR"="Font & Color";
+"SHORTCUT"="Shortcut";
 "DONATE"="Donate";
 
 // TextPreview
@@ -46,4 +47,10 @@
 "LOWER_LYRICS"="Lower Lyrics";
 "VERTICAL"="Switch to Vertical Lyrics(beta)";
 "HORIZONTAL"="Switch to Horizontal Lyrics";
+
+// Message Window
+"OFFSET"="Offset: %d";
+"DESKTOP_ON"="Desktop Lyrics ON";
+"MENU_BAR_ON"="Menu Bar Lyrics ON";
+"BOTH_ON"="Desktop & Menu Bar Lyrics ON";
 
