@@ -9,7 +9,7 @@
 import Cocoa
 import ScriptingBridge
 
-class AppController: NSObject {
+class AppController: NSObject, NSUserNotificationCenterDelegate {
     
     //Singleton
     static let sharedAppController = AppController()
@@ -41,9 +41,12 @@ class AppController: NSObject {
     private var xiami:Xiami!
     private var ttpod:TTPod!
     private var geciMe:GeCiMe!
+    private var qqMusic:QQMusic!
     private var lrcSourceHandleQueue:NSOperationQueue!
     private var userDefaults:NSUserDefaults!
     private var timer: NSTimer!
+    private var regexForTimeTag: NSRegularExpression!
+    private var regexForIDTag: NSRegularExpression!
     
 // MARK: - Init & deinit
     override init() {
@@ -56,6 +59,7 @@ class AppController: NSObject {
         xiami = Xiami()
         ttpod = TTPod()
         geciMe = GeCiMe()
+        qqMusic = QQMusic()
         userDefaults = NSUserDefaults.standardUserDefaults()
         lrcSourceHandleQueue = NSOperationQueue()
         lrcSourceHandleQueue.maxConcurrentOperationCount = 1
@@ -89,6 +93,21 @@ class AppController: NSObject {
         let ndc = NSDistributedNotificationCenter.defaultCenter()
         ndc.addObserver(self, selector: "iTunesPlayerInfoChanged:", name: "com.apple.iTunes.playerInfo", object: nil)
         ndc.addObserver(self, selector: "handleExtenalLyricsEvent:", name: "ExtenalLyricsEvent", object: nil)
+        
+        do {
+            regexForTimeTag = try NSRegularExpression(pattern: "\\[[0-9]+:[0-9]+.[0-9]+\\]|\\[[0-9]+:[0-9]+\\]", options: [])
+        } catch let theError as NSError {
+            NSLog("%@", theError.localizedDescription)
+            return
+        }
+        //the regex below should only use when the string doesn't contain time-tags
+        //because all time-tags would be matched as well.
+        do {
+            regexForIDTag = try NSRegularExpression(pattern: "\\[.*:.*\\]", options: [])
+        } catch let theError as NSError {
+            NSLog("%@", theError.localizedDescription)
+            return
+        }
         
         currentLyrics = "LyricsX"
         if iTunes.running() && iTunes.playing() {
@@ -242,6 +261,7 @@ class AppController: NSObject {
     
     @IBAction func copyLyricsToPb(sender: AnyObject?) {
         if lyricsArray.count == 0 {
+            MessageWindowController.sharedMsgWindow.displayMessage(NSLocalizedString("OPERATION_FAILED", comment: ""))
             return
         }
         let theLyrics: NSMutableString = NSMutableString()
@@ -251,14 +271,18 @@ class AppController: NSObject {
         let pb = NSPasteboard.generalPasteboard()
         pb.clearContents()
         pb.writeObjects([theLyrics])
+        MessageWindowController.sharedMsgWindow.displayMessage(NSLocalizedString("COPYED_TO_PB", comment: ""))
     }
     
     @IBAction func copyLyricsWithTagsToPb(sender: AnyObject) {
         let lrcContents = readLocalLyrics()
-        if lrcContents != nil {
+        if lrcContents != nil && lrcContents != "" {
             let pb = NSPasteboard.generalPasteboard()
             pb.clearContents()
             pb.writeObjects([lrcContents!])
+            MessageWindowController.sharedMsgWindow.displayMessage(NSLocalizedString("COPYED_TO_PB", comment: ""))
+        } else {
+            MessageWindowController.sharedMsgWindow.displayMessage(NSLocalizedString("OPERATION_FAILED", comment: ""))
         }
     }
     
@@ -345,8 +369,16 @@ class AppController: NSObject {
         panel.extensionHidden = false
         
         if panel.runModal() == NSFileHandlingPanelOKButton {
+            let fm = NSFileManager.defaultManager()
+            if fm.fileExistsAtPath(panel.URL!.path!) {
+                do {
+                    try fm.removeItemAtURL(panel.URL!)
+                } catch let theError as NSError {
+                    NSLog("%@", theError.localizedDescription)
+                }
+            }
             do {
-                try NSFileManager.defaultManager().copyItemAtPath(lrcFilePath, toPath: panel.URL!.path!)
+                try fm.copyItemAtPath(lrcFilePath, toPath: panel.URL!.path!)
             } catch let theError as NSError {
                 NSLog("%@", theError.localizedDescription)
             }
@@ -355,6 +387,7 @@ class AppController: NSObject {
     
     @IBAction func writeLyricsToiTunes(sender: AnyObject?) {
         if lyricsArray.count == 0 {
+            MessageWindowController.sharedMsgWindow.displayMessage(NSLocalizedString("OPERATION_FAILED", comment: ""))
             return
         } else {
             let theLyrics: NSMutableString = NSMutableString()
@@ -362,6 +395,7 @@ class AppController: NSObject {
                 theLyrics.appendString(lrc.lyricsSentence as String + "\n")
             }
             iTunes.setLyrics(theLyrics as String)
+            MessageWindowController.sharedMsgWindow.displayMessage(NSLocalizedString("WROTE_TO_ITUNES", comment: ""))
         }
     }
     
@@ -523,23 +557,6 @@ class AppController: NSObject {
         }
         let newLineCharSet: NSCharacterSet = NSCharacterSet.newlineCharacterSet()
         let lrcParagraphs: NSArray = lrcContents.componentsSeparatedByCharactersInSet(newLineCharSet)
-        let regexForTimeTag: NSRegularExpression
-        let regexForIDTag: NSRegularExpression
-        do {
-            regexForTimeTag = try NSRegularExpression(pattern: "\\[[0-9]+:[0-9]+.[0-9]+\\]|\\[[0-9]+:[0-9]+\\]", options: [])
-        } catch let theError as NSError {
-            NSLog("%@", theError.localizedDescription)
-            return
-        }
-        
-        //the regex below should only use when the string doesn't contain time-tags
-        //because all time-tags would be matched as well.
-        do {
-            regexForIDTag = try NSRegularExpression(pattern: "\\[.*:.*\\]", options: [])
-        } catch let theError as NSError {
-            NSLog("%@", theError.localizedDescription)
-            return
-        }
         
         for str in lrcParagraphs {
             let timeTagsMatched: NSArray = regexForTimeTag.matchesInString(str as! String, options: [.ReportProgress], range: NSMakeRange(0, str.length))
@@ -760,6 +777,7 @@ class AppController: NSObject {
         xiami.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: titleForSearching, andArtistForSearching: artistForSearching)
         ttpod.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: titleForSearching, andArtistForSearching: artistForSearching)
         geciMe.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: titleForSearching, andArtistForSearching: artistForSearching)
+        qqMusic.getLyricsWithTitle(loadingTitle, artist: loadingArtist, songID: loadingSongID, titleForSearching: titleForSearching, andArtistForSearching: artistForSearching)
     }
     
     func handleUserEditLyrics(n: NSNotification) {
@@ -789,8 +807,7 @@ class AppController: NSObject {
             let notification: NSUserNotification = NSUserNotification()
             notification.title = NSLocalizedString("NO_PLAYING_TRACK", comment: "")
             notification.informativeText = NSLocalizedString("IGNORE_LYRICS", comment: "")
-            notification.deliveryDate = NSDate(timeIntervalSinceNow: 0.1)
-            NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification(notification)
+            NSUserNotificationCenter.defaultUserNotificationCenter().deliverNotification(notification)
             return
         }
         //User lrc has the highest priority level
@@ -835,42 +852,35 @@ class AppController: NSObject {
         let songTitle: String = userInfo!["title"] as! String
         let artist: String = userInfo!["artist"] as! String
         let songID: String = userInfo!["songID"] as! String
+        let serverLrcs: [SongInfos]
         switch source {
         case 1:
-            let serverLrcs: NSArray = (self.qianqian.currentSongs as NSArray).copy() as! NSArray
-            if serverLrcs.count > 0 {
-                lrcSourceHandleQueue.addOperationWithBlock({ () -> Void in
-                    self.handleLrcURLDownloaded(serverLrcs, songTitle: songTitle, artist: artist, songID: songID)
-                })
-            }
+            serverLrcs = (self.qianqian.currentSongs as NSArray).copy() as! [SongInfos]
         case 2:
-            let serverLrcs: NSArray = (self.xiami.currentSongs as NSArray).copy() as! NSArray
-            if serverLrcs.count > 0 {
-                lrcSourceHandleQueue.addOperationWithBlock({ () -> Void in
-                    self.handleLrcURLDownloaded(serverLrcs, songTitle: songTitle, artist: artist, songID: songID)
-                })
-            }
+            serverLrcs = (self.xiami.currentSongs as NSArray).copy() as! [SongInfos]
         case 3:
-            let serverLrc: SongInfos = self.ttpod.songInfos.copy() as! SongInfos
-            if serverLrc.lyric != "" {
-                lrcSourceHandleQueue.addOperationWithBlock({ () -> Void in
-                    self.handleLrcContentsDownloaded(serverLrc.lyric, songTitle: songTitle, artist: artist, songID: songID)
-                })
+            let info: SongInfos = self.ttpod.songInfos.copy() as! SongInfos
+            if info.lyric == "" {
+                return
+            } else {
+                serverLrcs = [info]
             }
         case 4:
-            let serverLrcs: NSArray = (self.geciMe.currentSongs as NSArray).copy() as! NSArray
-            if serverLrcs.count > 0 {
-                lrcSourceHandleQueue.addOperationWithBlock({ () -> Void in
-                    self.handleLrcURLDownloaded(serverLrcs, songTitle: songTitle, artist: artist, songID: songID)
-                })
-            }
+            serverLrcs = (self.geciMe.currentSongs as NSArray).copy() as! [SongInfos]
+        case 5:
+            serverLrcs = (self.qqMusic.currentSongs as NSArray).copy() as! [SongInfos]
         default:
             return;
+        }
+        if serverLrcs.count > 0 {
+            lrcSourceHandleQueue.addOperationWithBlock({ () -> Void in
+                self.handleLrcURLDownloaded(serverLrcs, songTitle: songTitle, artist: artist, songID: songID)
+            })
         }
     }
     
     
-    private func handleLrcURLDownloaded(serverLrcs: NSArray, songTitle:String, artist:NSString, songID:NSString) {
+    private func handleLrcURLDownloaded(serverLrcs: [SongInfos], songTitle:String, artist:NSString, songID:NSString) {
         // alread has lyrics, check if user needs a better one.
         if lyricsArray.count > 0 {
             if userDefaults.boolForKey(LyricsSearchForDiglossiaLrc) {
@@ -885,12 +895,17 @@ class AppController: NSObject {
         var lyricsContents: NSString! = nil
         for lrc in serverLrcs {
             if isDiglossiaLrc(lrc.songTitle + lrc.artist) {
-                do {
-                    lyricsContents = try NSString(contentsOfURL: NSURL(string: lrc.lyricURL)!, encoding: NSUTF8StringEncoding)
-                } catch let theError as NSError{
-                    NSLog("%@", theError.localizedDescription)
-                    lyricsContents = nil
-                    continue
+                if lrc.lyric != nil {
+                    lyricsContents = lrc.lyric
+                }
+                else if lrc.lyricURL != nil {
+                    do {
+                        lyricsContents = try NSString(contentsOfURL: NSURL(string: lrc.lyricURL)!, encoding: NSUTF8StringEncoding)
+                    } catch let theError as NSError{
+                        NSLog("%@", theError.localizedDescription)
+                        lyricsContents = nil
+                        continue
+                    }
                 }
                 break
             }
@@ -906,13 +921,17 @@ class AppController: NSObject {
             lyricsContents = nil
             hasDiglossiaLrc = false
             for lrc in serverLrcs {
-                let theURL:NSURL = NSURL(string: lrc.lyricURL)!
-                do {
-                    lyricsContents = try NSString(contentsOfURL: theURL, encoding: NSUTF8StringEncoding)
-                } catch let theError as NSError{
-                    NSLog("%@", theError.localizedDescription)
-                    lyricsContents = nil
-                    continue
+                if lrc.lyric != nil {
+                    lyricsContents = lrc.lyric
+                }
+                else if lrc.lyricURL != nil {
+                    do {
+                        lyricsContents = try NSString(contentsOfURL: NSURL(string: lrc.lyricURL)!, encoding: NSUTF8StringEncoding)
+                    } catch let theError as NSError{
+                        NSLog("%@", theError.localizedDescription)
+                        lyricsContents = nil
+                        continue
+                    }
                 }
                 if lyricsContents != nil && testLrc(lyricsContents) {
                     hasLrc = true
@@ -929,20 +948,6 @@ class AppController: NSObject {
             }
             saveLrcToLocal(lyricsContents, songTitle: songTitle, artist: artist)
         }
-    }
-    
-    
-    private func handleLrcContentsDownloaded(lyricsContents: NSString, songTitle:String, artist:NSString, songID:NSString) {
-        if lyricsArray.count > 0 {
-            return
-        }
-        if !testLrc(lyricsContents) {
-            return
-        }
-        if songID == currentSongID {
-            parsingLrc(lyricsContents)
-        }
-        saveLrcToLocal(lyricsContents, songTitle: songTitle, artist: artist)
     }
     
 // MARK: - Shortcut Events
