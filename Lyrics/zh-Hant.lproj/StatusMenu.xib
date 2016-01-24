@@ -11,6 +11,7 @@
                 <outlet property="lyricsDelayView" destination="3Jx-vU-QNM" id="2fJ-DT-b0e"/>
                 <outlet property="lyricsHeightMenuItem" destination="vCd-AW-Rcg" id="8xb-RL-gkT"/>
                 <outlet property="lyricsModeMenuItem" destination="EXT-Nh-H57" id="bt9-7l-8fa"/>
+                <outlet property="presetMenuItem" destination="yhU-NE-UXp" id="sn3-gi-mUo"/>
                 <outlet property="statusBarMenu" destination="tTA-dl-Isx" id="TWf-gB-4JV"/>
             </connections>
         </customObject>
@@ -142,6 +143,16 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="預設" id="yhU-NE-UXp">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="預設" id="foO-V2-G3F">
+                        <items>
+                            <menuItem title="（空）" id="GxH-Ha-wNV">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="從iTunes匯出專輯封面..." id="Czc-V7-Kvq">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -161,11 +172,17 @@
                         <action selector="showPreferences:" target="-2" id="OHZ-tL-sQF"/>
                     </connections>
                 </menuItem>
+                <menuItem title="捐贈..." id="jg9-fM-w5k">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="showDonate:" target="-2" id="Qud-4D-sbu"/>
+                    </connections>
+                </menuItem>
                 <menuItem isSeparatorItem="YES" id="lfR-h4-Fcs"/>
                 <menuItem title="關於LyricsX..." id="QoB-2y-8a4">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="orderFrontStandardAboutPanel:" target="-1" id="UVr-pZ-Hc1"/>
+                        <action selector="showAboutWindow:" target="-2" id="bZK-10-0BU"/>
                     </connections>
                 </menuItem>
                 <menuItem title="檢查更新..." id="R96-lC-i2Q">

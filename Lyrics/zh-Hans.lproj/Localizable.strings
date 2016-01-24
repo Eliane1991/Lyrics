@@ -12,7 +12,7 @@
 "OPEN_PREFS" = "打开偏好设置并重设路径";
 "IGNORE" = "忽略";
 "CHANGE_UNSAVED"="更改未保存";
-"DISGARDS_LEAVE"="您确定放弃保存兵离开当前界面?";
+"DISGARDS_LEAVE"="您确定放弃保存并离开当前界面?";
 "APPLY_LEAVE"="应用并离开";
 "REVERT_LEAVE"="还原并离开";
 "CANCEL"="取消";
@@ -31,6 +31,14 @@
 "FONT_COLOR"="字体与颜色";
 "SHORTCUT"="快捷键";
 "DONATE"="捐赠";
+"PRESET"="预设";
+
+// Preset Prefs
+"UNTITLED_PRESET"="未命名预设";
+"EMPTY_NAME"="预设名不能为空";
+"PRESET_EXISTS"="已存在同名预设";
+"INVALID_PRESET"="无效的预设";
+"PRESET_LOADED"="预设已载入";
 
 // TextPreview
 "PREVIEW_TEXT"="歌词效果预览";
@@ -47,12 +55,17 @@
 "LOWER_LYRICS"="降低歌词位置";
 "VERTICAL"="使用纵向歌词模式(beta)";
 "HORIZONTAL"="使用横向歌词模式";
+"EMPTY"="(空)";
 
 // Message Window
-"OFFSET"="歌词偏移: %d";
+"OFFSET"="歌词偏移:%d ms";
 "DESKTOP_ON"="桌面歌词开启";
 "MENU_BAR_ON"="菜单栏歌词开启";
 "BOTH_ON"="桌面与菜单栏歌词开启";
 "OPERATION_FAILED"="操作失败:没有歌词";
 "WROTE_TO_ITUNES"="歌词已写入iTunes";
 "COPYED_TO_PB"="歌词已拷贝到剪贴板";
+"NO_ARTWORK"="歌曲不包含专辑封面";
+
+// About Window
+"EULA"="许可协议";

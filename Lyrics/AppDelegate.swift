@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import ServiceManagement
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -52,7 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             LyricsShadowModeEnable : NSNumber(bool: true),
             LyricsTextColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor.whiteColor()),
             LyricsBackgroundColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor(calibratedWhite: 0, alpha: 0.5)),
-            LyricsShadowColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor.yellowColor()),
+            LyricsShadowColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor.orangeColor()),
             LyricsShadowRadius : NSNumber(float: 4),
             LyricsBgHeightINCR : NSNumber(float: 0),
             LyricsYOffset : NSNumber(float: 0)
@@ -64,19 +65,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let lyricsXHelpers = NSRunningApplication.runningApplicationsWithBundleIdentifier("Eru.LyricsX-Helper")
         for helper in lyricsXHelpers {
-            helper.terminate()
+            helper.forceTerminate()
         }
         
-        // Force Singleton to init
-        AppController.sharedAppController
-        // Force Prefs to load and setup shortcuts
-        let prefs = AppPrefsWindowController.sharedPrefsWindowController()
+        // Force singleton to init
+        AppController.sharedController
+        
+        // Force Prefs to load and setup shortcuts,etc
+        let prefs = AppPrefsWindowController.sharedPrefsWindowController
         prefs.showWindow(nil)
-        prefs.window?.orderOut(nil)
+        prefs.setupShortcuts()
+        prefs.reflashPreset(nil)
+        prefs.window?.close()
+        
+        //Check if login item hasn't be enabled
+        let identifier: String = "Eru.LyricsX-Helper"
+        if NSUserDefaults.standardUserDefaults().boolForKey(LyricsAutoLaunches) {
+            if !SMLoginItemSetEnabled(identifier, true) {
+                NSLog("Failed to enable login item")
+            }
+        }
     }
     
     func applicationWillTerminate(aNotification: NSNotification) {
-        let appController = AppController.sharedAppController
+        let appController = AppController.sharedController
         if appController.timeDly != appController.timeDlyInFile {
             NSLog("App terminating, saveing lrc time delay change...")
             appController.handleLrcDelayChange()

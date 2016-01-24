@@ -31,6 +31,14 @@
 "FONT_COLOR"="Font & Color";
 "SHORTCUT"="Shortcut";
 "DONATE"="Donate";
+"PRESET"="Preset";
+
+// Preset Prefs
+"UNTITLED_PRESET"="Untitled Preset";
+"EMPTY_NAME"="Empty Preset Name";
+"PRESET_EXISTS"="Preset With the Same Already Exists";
+"INVALID_PRESET"="Invalid Preset";
+"PRESET_LOADED"="Preset Loaded";
 
 // TextPreview
 "PREVIEW_TEXT"="Lyrics Preview";
@@ -47,12 +55,17 @@
 "LOWER_LYRICS"="Lower Lyrics";
 "VERTICAL"="Switch to Vertical Lyrics(beta)";
 "HORIZONTAL"="Switch to Horizontal Lyrics";
+"EMPTY"="(Empty)";
 
 // Message Window
-"OFFSET"="Offset: %d";
+"OFFSET"="Offset:%d ms";
 "DESKTOP_ON"="Desktop Lyrics:ON";
 "MENU_BAR_ON"="Menu Bar Lyrics:ON";
 "BOTH_ON"="Desktop & Menu Bar Lyrics:ON";
 "OPERATION_FAILED"="Operation Failed:No Lrc";
 "WROTE_TO_ITUNES"="Lyrics Has Wrote To iTunes";
 "COPYED_TO_PB"="Lyrics Has Copyed To Pasteboard";
+"NO_ARTWORK"="No Available Artwork";
+
+// About Window
+"EULA"="EULA";

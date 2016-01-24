@@ -11,6 +11,7 @@
                 <outlet property="lyricsDelayView" destination="3Jx-vU-QNM" id="2fJ-DT-b0e"/>
                 <outlet property="lyricsHeightMenuItem" destination="3ij-j4-VJE" id="Q4F-Zg-dYg"/>
                 <outlet property="lyricsModeMenuItem" destination="WWe-QG-SLQ" id="7IY-DD-Jwn"/>
+                <outlet property="presetMenuItem" destination="2lK-fX-158" id="mBl-9H-PXZ"/>
                 <outlet property="statusBarMenu" destination="tTA-dl-Isx" id="TWf-gB-4JV"/>
             </connections>
         </customObject>
@@ -142,6 +143,16 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="Presets" id="2lK-fX-158">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Presets" id="wMI-On-bIv">
+                        <items>
+                            <menuItem title="(Empty)" id="cB6-FH-qcX">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="Export Artwork From iTunes..." id="Czc-V7-Kvq">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -161,11 +172,17 @@
                         <action selector="showPreferences:" target="-2" id="OHZ-tL-sQF"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Donate..." id="xF9-cS-i7i">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="showDonate:" target="-2" id="r4X-XC-MX0"/>
+                    </connections>
+                </menuItem>
                 <menuItem isSeparatorItem="YES" id="txX-dr-HGn"/>
                 <menuItem title="About LyricsX..." id="QoB-2y-8a4">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="orderFrontStandardAboutPanel:" target="-1" id="UVr-pZ-Hc1"/>
+                        <action selector="showAboutWindow:" target="-2" id="12Q-aq-Cs4"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Check For Update..." id="R96-lC-i2Q">
