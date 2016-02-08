@@ -112,21 +112,30 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
         
         currentLyrics = "LyricsX"
         if iTunes.running() && iTunes.playing() {
-            
             currentSongID = iTunes.currentPersistentID()
             currentSongTitle = iTunes.currentTitle()
             currentArtist = iTunes.currentArtist()
             
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { () -> Void in
-                self.handleSongChange()
+            if currentSongID == "" {
+                // If iTunes is playing Apple Music, nothing can get from API,
+                // so, we should pause and then play to force iTunes send
+                // distributed notification.
+                iTunes.pause()
+                iTunes.play()
             }
-            
-            NSLog("Create new iTunesTrackingThead")
-            isTrackingRunning = true
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { () -> Void in
-                self.iTunesTrackingThread()
+            else {
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { () -> Void in
+                    self.handleSongChange()
+                }
+                
+                NSLog("Create new iTunesTrackingThead")
+                isTrackingRunning = true
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { () -> Void in
+                    self.iTunesTrackingThread()
+                }
             }
-        } else {
+        }
+        else {
             currentSongID = ""
             currentSongTitle = ""
             currentArtist = ""
@@ -480,7 +489,7 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
     }
     
     
-    func iTunesPlayerInfoChanged (n:NSNotification){
+    func iTunesPlayerInfoChanged (n:NSNotification) {
         let userInfo = n.userInfo
         if userInfo == nil {
             return
@@ -494,7 +503,7 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
                     if timer != nil {
                         timer.invalidate()
                     }
-                    timer = NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "terminate", userInfo: nil, repeats: false)
+                    timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "terminate", userInfo: nil, repeats: false)
                 }
                 return
             }
@@ -510,21 +519,50 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
                 NSLog("iTunes Playing")
             }
             else if userInfo!["Player State"] as! String == "Stopped" {
-                // No playing or paused, send this player state when quitted
+                // iTunes send this player state when quit in some case.
+                currentSongID = ""
+                currentSongTitle = ""
+                currentArtist = ""
                 if timer != nil {
                     timer.invalidate()
                 }
-                timer = NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "terminate", userInfo: nil, repeats: false)
+                timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "terminate", userInfo: nil, repeats: false)
+                return
             }
             
-            // check whether song is changed
-            if currentSongID == iTunes.currentPersistentID() {
+            // Get infos from userinfo if can't get them from API.
+            var songID: String = iTunes.currentPersistentID()
+            var songTitle: String = iTunes.currentTitle()
+            var artist: String = iTunes.currentArtist()
+            if songID == "" {
+                let aSongID = userInfo!["PersistentID"]
+                if aSongID != nil {
+                    songID = (aSongID as! NSNumber).stringValue
+                }
+            }
+            if songTitle == "" {
+                let aSongTitle = userInfo!["Name"]
+                if aSongTitle != nil {
+                    songTitle = aSongTitle as! String
+                }
+            }
+            if artist == "" {
+                let aArtist = userInfo!["Artist"]
+                if aArtist != nil {
+                    artist = aArtist as! String
+                }
+            }
+            
+            // Check whether song is changed.
+            if currentSongID == songID {
                 return
             } else {
                 //if time-Delay for the previous song is changed, we should save the change to lrc file.
                 //Save time-Delay laziely for better I/O performance.
                 if timeDly != timeDlyInFile {
-                    handleLrcDelayChange()
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
+                        self.handleLrcDelayChange()
+                    })
                 }
                 
                 lyricsArray.removeAll()
@@ -533,13 +571,17 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
                 timeDlyInFile = 0
                 currentLyrics = nil
                 lyricsWindow.displayLyrics(nil, secondLyrics: nil)
-                currentSongID = iTunes.currentPersistentID()
-                currentSongTitle = iTunes.currentTitle()
-                currentArtist = iTunes.currentArtist()
-                NSLog("Song Changed to: %@",currentSongTitle)
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
-                    self.handleSongChange()
-                })
+                currentSongID = songID
+                currentSongTitle = songTitle
+                currentArtist = artist
+                if currentSongID != "" {
+                    NSLog("Song Changed to: %@",currentSongTitle)
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), { () -> Void in
+                        self.handleSongChange()
+                    })
+                } else {
+                    NSLog("iTunes Stopped")
+                }
             }
         }
     }
@@ -575,18 +617,18 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
             lrcContents = theLrcContents
         }
         let newLineCharSet: NSCharacterSet = NSCharacterSet.newlineCharacterSet()
-        let lrcParagraphs: [NSString] = lrcContents.componentsSeparatedByCharactersInSet(newLineCharSet)
+        let lrcParagraphs: [String] = lrcContents.componentsSeparatedByCharactersInSet(newLineCharSet)
         
         for str in lrcParagraphs {
-            let timeTagsMatched: [NSTextCheckingResult] = regexForTimeTag.matchesInString(str as String, options: [], range: NSMakeRange(0, str.length))
+            let timeTagsMatched: [NSTextCheckingResult] = regexForTimeTag.matchesInString(str, options: [], range: NSMakeRange(0, str.characters.count))
             if timeTagsMatched.count > 0 {
                 let index: Int = timeTagsMatched.last!.range.location + timeTagsMatched.last!.range.length
-                let lyricsSentence: String = str.substringFromIndex(index)
+                let lyricsSentence: String = str.substringFromIndex(str.startIndex.advancedBy(index))
                 for result in timeTagsMatched {
                     let matchedRange: NSRange = result.range
                     let lrcLine: LyricsLineModel = LyricsLineModel()
                     lrcLine.lyricsSentence = lyricsSentence
-                    lrcLine.setMsecPositionWithTimeTag(str.substringWithRange(matchedRange))
+                    lrcLine.setMsecPositionWithTimeTag((str as NSString).substringWithRange(matchedRange))
                     let currentCount: Int = lyricsArray.count
                     var j: Int
                     for j=0; j<currentCount; ++j {
@@ -601,13 +643,13 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
                 }
             }
             else {
-                let idTagsMatched: [NSTextCheckingResult] = regexForIDTag.matchesInString(str as String, options: [], range: NSMakeRange(0, str.length))
+                let idTagsMatched: [NSTextCheckingResult] = regexForIDTag.matchesInString(str, options: [], range: NSMakeRange(0, str.characters.count))
                 if idTagsMatched.count == 0 {
                     continue
                 }
                 for result in idTagsMatched {
                     let matchedRange: NSRange = result.range
-                    let idTag: NSString = str.substringWithRange(matchedRange) as NSString
+                    let idTag: NSString = (str as NSString).substringWithRange(matchedRange) as NSString
                     let colonRange: NSRange = idTag.rangeOfString(":")
                     let idStr: String = idTag.substringWithRange(NSMakeRange(1, colonRange.location-1))
                     if idStr.stringByReplacingOccurrencesOfString(" ", withString: "") != "offset" {
@@ -820,7 +862,7 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
         if currentSongID == "" {
             let notification: NSUserNotification = NSUserNotification()
             notification.title = NSLocalizedString("NO_PLAYING_TRACK", comment: "")
-            notification.informativeText = NSLocalizedString("IGNORE_LYRICS", comment: "")
+            notification.informativeText = String(format: NSLocalizedString("IGNORE_LYRICS", comment: ""), userInfo!["Sender"] as! String)
             NSUserNotificationCenter.defaultUserNotificationCenter().deliverNotification(notification)
             return
         }
@@ -1035,8 +1077,8 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
         }
     }
     
-    private func isDiglossiaLrc(serverSongTitle: NSString) -> Bool {
-        if serverSongTitle.rangeOfString("中").location != NSNotFound || serverSongTitle.rangeOfString("对照").location != NSNotFound || serverSongTitle.rangeOfString("双").location != NSNotFound {
+    private func isDiglossiaLrc(serverSongTitle: String) -> Bool {
+        if serverSongTitle.rangeOfString("中") != nil || serverSongTitle.rangeOfString("对照") != nil || serverSongTitle.rangeOfString("双") != nil {
             return true
         }
         return false
