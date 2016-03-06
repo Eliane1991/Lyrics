@@ -18,7 +18,7 @@ import Cocoa
 import QuartzCore
 import CoreGraphics
 
-class DesktopLyricsController: NSWindowController {
+class DesktopLyricsController: NSWindowController, NSWindowDelegate {
     
     static let sharedController = DesktopLyricsController()
     
@@ -41,9 +41,9 @@ class DesktopLyricsController: NSWindowController {
     
     convenience init() {
         NSLog("Init Lyrics window")
-        let lyricsWindow = NSWindow(contentRect: NSZeroRect, styleMask: NSBorderlessWindowMask, backing: NSBackingStoreType.Buffered, `defer`: false)
+        let lyricsWindow = NSWindow(contentRect: NSMakeRect(0, 0, 100, 100), styleMask: NSBorderlessWindowMask|NSTexturedBackgroundWindowMask, backing: NSBackingStoreType.Buffered, `defer`: false)
         self.init(window: lyricsWindow)
-        
+        lyricsWindow.delegate = self
         lyricsWindow.backgroundColor = NSColor.clearColor()
         lyricsWindow.opaque = false
         lyricsWindow.hasShadow = false
@@ -81,6 +81,7 @@ class DesktopLyricsController: NSWindowController {
         backgroundLayer.addSublayer(secondLyricsLayer)
         setAttributes()
         setScreenResolution()
+        checkAutoLayout()
         displayLyrics("LyricsX", secondLyrics: nil)
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "handleScreenResolutionChange", name: NSApplicationDidChangeScreenParametersNotification, object: nil)
@@ -144,12 +145,15 @@ class DesktopLyricsController: NSWindowController {
     }
     
     func setScreenResolution() {
-        let visibleFrame:NSRect=(NSScreen.mainScreen()?.visibleFrame)!
-        visibleSize=visibleFrame.size
-        visibleOrigin=visibleFrame.origin
-        self.window?.setFrame((NSScreen.mainScreen()?.frame)!, display: true)
-        firstLyricsLayer.contentsScale=(NSScreen.mainScreen()?.backingScaleFactor)!
-        secondLyricsLayer.contentsScale=firstLyricsLayer.contentsScale
+        self.window!.setFrameOrigin(NSZeroPoint)
+        let visibleFrame: NSRect = self.window!.screen!.visibleFrame
+        visibleSize = visibleFrame.size
+        visibleOrigin = visibleFrame.origin
+        if userDefaults.boolForKey(LyricsUseAutoLayout) {
+            self.window!.setFrame(self.window!.screen!.frame, display: true)
+        }
+        firstLyricsLayer.contentsScale = self.window!.screen!.backingScaleFactor
+        secondLyricsLayer.contentsScale = firstLyricsLayer.contentsScale
         NSLog("Screen Visible Res Changed to:(%f,%f) O:(%f,%f)", visibleSize.width,visibleSize.height,visibleOrigin.x,visibleOrigin.y)
     }
     
@@ -174,7 +178,22 @@ class DesktopLyricsController: NSWindowController {
             verticalStyle = 0
         }
     }
-
+    
+    func checkAutoLayout() {
+        if userDefaults.boolForKey(LyricsUseAutoLayout) {
+            self.window!.ignoresMouseEvents = true
+            self.window!.setFrame(self.window!.screen!.frame, display: true)
+            self.window!.styleMask = self.window!.styleMask & ~NSResizableWindowMask
+        }
+        else {
+            let frameSize = NSMakeRect(100, 100, CGFloat(userDefaults.floatForKey(LyricsConstWidth)), CGFloat(userDefaults.floatForKey(LyricsConstHeight)))
+            self.window!.setFrame(frameSize, display: true)
+            self.window!.ignoresMouseEvents = false
+            self.window!.styleMask = window!.styleMask | NSResizableWindowMask
+        }
+        reflash()
+    }
+    
 // MARK: - display lyrics methods
     
     func displayLyrics(theFirstLyrics: String?, secondLyrics theSecondLyrics: String?) {
@@ -194,7 +213,7 @@ class DesktopLyricsController: NSWindowController {
             isRotated = false
         }
         
-        if userDefaults.boolForKey(LyricsIsVerticalLyrics) {
+        if userDefaults.boolForKey(LyricsIsVerticalLyrics) && userDefaults.boolForKey(LyricsUseAutoLayout) {
             displayVerticalLyrics()
         } else {
             displayHorizontalLyrics()
@@ -205,17 +224,21 @@ class DesktopLyricsController: NSWindowController {
         if firstLyrics == nil || firstLyrics == "" {
             // first Lyrics empty means it's in instrumental time, hide lyrics
             rollingOver = true
-            backgroundLayer.speed=0.2
-            firstLyricsLayer.speed = 0.2
-            secondLyricsLayer.speed = 0.2
-            
-            firstLyricsLayer.frame = NSMakeRect(backgroundLayer.frame.size.width/3, 0, 0, 0)
-            secondLyricsLayer.frame = NSMakeRect(backgroundLayer.frame.size.width/3, 0, 0, 0)
-            firstLyricsLayer.string = ""
-            secondLyricsLayer.string = ""
+            firstLyricsLayer.speed = 0.4
+            secondLyricsLayer.speed = 0.4
+            if self.window!.ignoresMouseEvents {
+                backgroundLayer.speed=0.4
+                backgroundLayer.hidden = true
+            }
+            else {
+                backgroundLayer.frame = CGRectMake(0, 0, self.window!.frame.width, self.window!.frame.height)
+                backgroundLayer.hidden = false
+            }
             firstLyricsLayer.hidden = true
             secondLyricsLayer.hidden = true
-            backgroundLayer.hidden = true
+            
+            firstLyricsLayer.string = ""
+            secondLyricsLayer.string = ""
         }
         else if secondLyrics == nil || secondLyrics == "" {
             // one lyrics
@@ -229,10 +252,10 @@ class DesktopLyricsController: NSWindowController {
             backgroundLayer.hidden = false
             
             let strSize:NSSize = firstLyrics!.sizeWithAttributes(attrs)
-            var x:CGFloat
-            let y:CGFloat
             
             if userDefaults.boolForKey(LyricsUseAutoLayout) {
+                var x:CGFloat
+                let y:CGFloat
                 var frameSize = NSMakeSize(strSize.width+50, strSize.height)
                 if !isFullScreen {
                     x = visibleOrigin.x+(visibleSize.width-frameSize.width)/2
@@ -256,15 +279,12 @@ class DesktopLyricsController: NSWindowController {
                 firstLyricsLayer.frame = CGRectMake(0, yOffset, frameSize.width, frameSize.height+lyricsHeightIncreasement)
             }
             else {
-                let frameSize = NSMakeSize(CGFloat(userDefaults.integerForKey(LyricsConstWidth)), CGFloat(userDefaults.integerForKey(LyricsConstHeight)))
-                x = CGFloat(userDefaults.integerForKey(LyricsConstToLeft))
-                y = CGFloat(userDefaults.integerForKey(LyricsConstToBottom))
-                
+                let frameSize = self.window!.frame.size
                 var layerY = (frameSize.height - strSize.height)/2
                 if layerY < 0 {
                     layerY = 0
                 }
-                backgroundLayer.frame = CGRectMake(x, y, frameSize.width, frameSize.height)
+                backgroundLayer.frame = CGRectMake(0, 0, frameSize.width, frameSize.height)
                 firstLyricsLayer.frame = CGRectMake(0, layerY, frameSize.width, strSize.height)
             }
             
@@ -297,20 +317,20 @@ class DesktopLyricsController: NSWindowController {
             var rect1st: CGRect
             var rect2nd: CGRect
             
-            if size1st.width >= size2nd.width {
-                width = size1st.width
-            }
-            else {
-                width = size2nd.width
-            }
-            if width > visibleSize.width {
-                width = visibleSize.width
-            }
-            
-            rect1st = CGRectMake(0, size2nd.height+yOffset, width, size1st.height+lyricsHeightIncreasement)
-            rect2nd = CGRectMake(0, yOffset, width, size2nd.height+lyricsHeightIncreasement)
-            
             if userDefaults.boolForKey(LyricsUseAutoLayout) {
+                if size1st.width >= size2nd.width {
+                    width = size1st.width
+                }
+                else {
+                    width = size2nd.width
+                }
+                if width > visibleSize.width {
+                    width = visibleSize.width
+                }
+                
+                rect1st = CGRectMake(0, size2nd.height+yOffset, width, size1st.height+lyricsHeightIncreasement)
+                rect2nd = CGRectMake(0, yOffset, width, size2nd.height+lyricsHeightIncreasement)
+                
                 if !isFullScreen {
                     x = visibleOrigin.x+(visibleSize.width-width)/2
                     y = visibleOrigin.y+CGFloat(userDefaults.integerForKey(LyricsHeightFromDockToLyrics))
@@ -322,20 +342,16 @@ class DesktopLyricsController: NSWindowController {
                     x = 4
                 }
                 height = rect1st.size.height+rect2nd.size.height
-                
-            } else {
-                x = CGFloat(userDefaults.integerForKey(LyricsConstToLeft))
-                y = CGFloat(userDefaults.integerForKey(LyricsConstToBottom))
-                width = CGFloat(userDefaults.integerForKey(LyricsConstWidth))
-                height = CGFloat(userDefaults.integerForKey(LyricsConstHeight))
-                
-                rect1st.origin.x += (width-rect1st.size.width)/2
-                rect1st.origin.y = height/2
-                rect2nd.origin.x += (width-rect2nd.size.width)/2
-                rect2nd.origin.y = height/2-rect2nd.size.height
+                backgroundLayer.frame = CGRectMake(x, y, width, height)
             }
-            
-            backgroundLayer.frame = CGRectMake(x, y, width, height)
+            else {
+                width = self.window!.frame.width
+                height = self.window!.frame.height
+                
+                rect1st = CGRectMake(0, height/2, width, size1st.height)
+                rect2nd = CGRectMake(0, height/2-size2nd.height, width, size2nd.height)
+                backgroundLayer.frame = CGRectMake(0, 0, width, height)
+            }
             
             // whether needs rolling-over to show animation
             if rollingOver {
@@ -360,9 +376,9 @@ class DesktopLyricsController: NSWindowController {
         if firstLyrics == nil || firstLyrics == "" {
             // first Lyrics empty means it's in instrumental time, hide lyrics
             rollingOver = true
-            backgroundLayer.speed=0.2
-            firstLyricsLayer.speed = 0.2
-            secondLyricsLayer.speed = 0.2
+            backgroundLayer.speed=0.4
+            firstLyricsLayer.speed = 0.4
+            secondLyricsLayer.speed = 0.4
             
             firstLyricsLayer.string = ""
             secondLyricsLayer.string = ""
@@ -611,7 +627,7 @@ class DesktopLyricsController: NSWindowController {
             }
         }
         //4.just clip in the center
-        let formerPart = (firstLyrics! as NSString).substringToIndex(halfLength-1)
+        let formerPart = (firstLyrics! as NSString).substringToIndex(halfLength)
         let latterPart = (firstLyrics! as NSString).substringFromIndex(halfLength)
         firstLyrics = formerPart
         secondLyrics = latterPart
@@ -657,6 +673,20 @@ class DesktopLyricsController: NSWindowController {
             return true
         } else {
             return false
+        }
+    }
+    
+    func storeWindowSize() {
+        let position = self.window!.frame
+        userDefaults.setFloat(Float(position.width), forKey: LyricsConstWidth)
+        userDefaults.setFloat(Float(position.height), forKey: LyricsConstHeight)
+    }
+    
+//MARK: - Delegate
+    
+    func windowDidResize(notification: NSNotification) {
+        if !userDefaults.boolForKey(LyricsUseAutoLayout) {
+            reflash()
         }
     }
     

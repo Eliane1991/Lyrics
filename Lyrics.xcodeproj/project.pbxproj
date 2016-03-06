@@ -60,6 +60,7 @@
 		76C5115F1BEC6F8F0095F510 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 76C5115E1BEC6F8F0095F510 /* Assets.xcassets */; };
 		76C511621BEC6F8F0095F510 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 76C511601BEC6F8F0095F510 /* MainMenu.xib */; };
 		76C511781BEC6FD50095F510 /* Macros.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C511771BEC6FD50095F510 /* Macros.swift */; };
+		76C590C61C7E050B004564D9 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76C590C51C7E050B004564D9 /* IOKit.framework */; };
 		76D060451C02B8D8000DA86C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76D060441C02B8D8000DA86C /* AppDelegate.swift */; };
 		76D060471C02B8D9000DA86C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 76D060461C02B8D9000DA86C /* Assets.xcassets */; };
 		76D0604A1C02B8D9000DA86C /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 76D060481C02B8D9000DA86C /* MainMenu.xib */; };
@@ -73,6 +74,7 @@
 		76ECE2641C31223400089705 /* LrcMaker.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 76ECE2611C31222B00089705 /* LrcMaker.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		76ECE2651C31223400089705 /* LrcMerger.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 76ECE2621C31222B00089705 /* LrcMerger.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		76ECE2661C31223400089705 /* LrcSeeker.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 76ECE2631C31222B00089705 /* LrcSeeker.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		76FDF20A1C8B0D18006C3AB8 /* 关于双语歌词编辑工具.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 76FDF2091C8B0D18006C3AB8 /* 关于双语歌词编辑工具.pdf */; };
 		76FE94411BFC223600A1AC27 /* TextPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76FE94401BFC223600A1AC27 /* TextPreview.swift */; };
 		76FF43791BEF9BAB00D2B14F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76FF43781BEF9BAB00D2B14F /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
@@ -132,6 +134,8 @@
 		7622A7621C2A6757001250DD /* ClickView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClickView.swift; sourceTree = "<group>"; };
 		7633A2FE1C202F9500D58360 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		763763C71C292754003EB0B5 /* MASShortcut.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MASShortcut.framework; sourceTree = "<group>"; };
+		7641E35C1C8AB3ED00222FC0 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
+		7641E35D1C8AB3F300222FC0 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
 		7642B9001BF45B0100D68FE9 /* LyricsLineModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LyricsLineModel.swift; sourceTree = "<group>"; };
 		7642B9031BF4709300D68FE9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/StatusMenu.xib; sourceTree = "<group>"; };
 		7642B9061BF488AB00D68FE9 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
@@ -146,8 +150,6 @@
 		766D670D1C03530E00B5405B /* iTunesBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunesBridge.h; sourceTree = "<group>"; };
 		766D670E1C03530E00B5405B /* iTunesBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iTunesBridge.m; sourceTree = "<group>"; };
 		766F03C41C049372003F4790 /* LyricsEditView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LyricsEditView.swift; sourceTree = "<group>"; };
-		7678A9F41BFF428200FE848C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
-		7678A9F71BFF428900FE848C /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
 		7678A9FC1BFF475900FE848C /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "zh-Hant"; path = "zh-Hant.lproj/StatusMenu.xib"; sourceTree = "<group>"; };
 		7678A9FD1BFF475D00FE848C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "zh-Hans"; path = "zh-Hans.lproj/StatusMenu.xib"; sourceTree = "<group>"; };
 		7678AA071BFF526700FE848C /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 		76C511611BEC6F8F0095F510 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		76C511631BEC6F8F0095F510 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		76C511771BEC6FD50095F510 /* Macros.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Macros.swift; sourceTree = "<group>"; };
+		76C590C51C7E050B004564D9 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		76D060421C02B8D8000DA86C /* LyricsX Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LyricsX Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		76D060441C02B8D8000DA86C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		76D060461C02B8D9000DA86C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -206,6 +209,7 @@
 		76ECE2611C31222B00089705 /* LrcMaker.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; name = LrcMaker.app; path = "Build-In App/LrcMaker.app"; sourceTree = "<group>"; };
 		76ECE2621C31222B00089705 /* LrcMerger.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; name = LrcMerger.app; path = "Build-In App/LrcMerger.app"; sourceTree = "<group>"; };
 		76ECE2631C31222B00089705 /* LrcSeeker.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; name = LrcSeeker.app; path = "Build-In App/LrcSeeker.app"; sourceTree = "<group>"; };
+		76FDF2091C8B0D18006C3AB8 /* 关于双语歌词编辑工具.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "关于双语歌词编辑工具.pdf"; sourceTree = "<group>"; };
 		76FE94401BFC223600A1AC27 /* TextPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextPreview.swift; sourceTree = "<group>"; };
 		76FF43781BEF9BAB00D2B14F /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -215,6 +219,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				76C590C61C7E050B004564D9 /* IOKit.framework in Frameworks */,
 				7633A2FF1C202F9500D58360 /* CoreGraphics.framework in Frameworks */,
 				76D0605E1C02B930000DA86C /* ServiceManagement.framework in Frameworks */,
 				768BCAE41BF185AD00D6F5EB /* ScriptingBridge.framework in Frameworks */,
@@ -300,6 +305,7 @@
 				76C5115E1BEC6F8F0095F510 /* Assets.xcassets */,
 				76C511631BEC6F8F0095F510 /* Info.plist */,
 				76E0D2341C426B2800946E63 /* Credits.rtf */,
+				76FDF2091C8B0D18006C3AB8 /* 关于双语歌词编辑工具.pdf */,
 				76E0D2351C426B2800946E63 /* EULA.rtf */,
 				768BCB401BF1C74C00D6F5EB /* OpenCC Res */,
 			);
@@ -316,6 +322,7 @@
 				766F03C41C049372003F4790 /* LyricsEditView.swift */,
 				769AFC3F1C29A9C600215A6D /* MessageWindowController.swift */,
 				76E0D2291C42407A00946E63 /* AboutWindowController.swift */,
+				7622A7621C2A6757001250DD /* ClickView.swift */,
 			);
 			name = "Wins & Views";
 			sourceTree = "<group>";
@@ -340,6 +347,7 @@
 				768BCB1F1BF1C62000D6F5EB /* libopencc.2.dylib */,
 				768BCB201BF1C62000D6F5EB /* libopencc.dylib */,
 				763763C71C292754003EB0B5 /* MASShortcut.framework */,
+				76C590C51C7E050B004564D9 /* IOKit.framework */,
 				7633A2FE1C202F9500D58360 /* CoreGraphics.framework */,
 				76D0605D1C02B930000DA86C /* ServiceManagement.framework */,
 				768BCAE31BF185AD00D6F5EB /* ScriptingBridge.framework */,
@@ -368,7 +376,6 @@
 				76C047251BF2F34C005053AC /* AppPrefsWindowController.swift */,
 				76C047171BF2E335005053AC /* DBPrefsWindowController.h */,
 				76C047181BF2E335005053AC /* DBPrefsWindowController.m */,
-				7622A7621C2A6757001250DD /* ClickView.swift */,
 				76FE94401BFC223600A1AC27 /* TextPreview.swift */,
 				768ADD0D1C47A4AA00567FE2 /* ContextMenuDelegate.swift */,
 				768ADD0B1C47980800567FE2 /* PresetListView.swift */,
@@ -557,6 +564,7 @@
 				76E0D22D1C42575900946E63 /* AboutWindow.xib in Resources */,
 				768BCB3B1BF1C74400D6F5EB /* STPhrases.ocd in Resources */,
 				768BCB351BF1C74400D6F5EB /* HKVariants.ocd in Resources */,
+				76FDF20A1C8B0D18006C3AB8 /* 关于双语歌词编辑工具.pdf in Resources */,
 				768BCB3F1BF1C74400D6F5EB /* TWVariants.ocd in Resources */,
 				768BCB3E1BF1C74400D6F5EB /* TSPhrases.ocd in Resources */,
 				76E0D2371C426B2800946E63 /* EULA.rtf in Resources */,
@@ -628,8 +636,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				7600121D1BFD9ECC00C7C1E4 /* Base */,
-				7678A9F41BFF428200FE848C /* zh-Hans */,
-				7678A9F71BFF428900FE848C /* zh-Hant */,
+				7641E35C1C8AB3ED00222FC0 /* zh-Hans */,
+				7641E35D1C8AB3F300222FC0 /* zh-Hant */,
 			);
 			name = LyricsEditWindow.xib;
 			sourceTree = "<group>";

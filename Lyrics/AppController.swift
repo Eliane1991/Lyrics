@@ -17,12 +17,12 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
     @IBOutlet weak var statusBarMenu: NSMenu!
     @IBOutlet weak var lyricsDelayView: NSView!
     @IBOutlet weak var delayMenuItem: NSMenuItem!
-    @IBOutlet weak var lyricsModeMenuItem: NSMenuItem!
     @IBOutlet weak var lyricsHeightMenuItem: NSMenuItem!
     @IBOutlet weak var presetMenuItem: NSMenuItem!
     
     var timeDly: Int = 0
     var timeDlyInFile: Int = 0
+    var lockFloatingWindow: Bool = false
     
     private var isTrackingRunning: Bool = false
     private var hasDiglossiaLrc: Bool = false
@@ -162,11 +162,6 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
     
         delayMenuItem.view = lyricsDelayView
         lyricsDelayView.autoresizingMask = [.ViewWidthSizable]
-        if userDefaults.boolForKey(LyricsIsVerticalLyrics) {
-            lyricsModeMenuItem.title = NSLocalizedString("HORIZONTAL", comment: "")
-        } else {
-            lyricsModeMenuItem.title = NSLocalizedString("VERTICAL", comment: "")
-        }
     }
     
     private func checkSavingPath() -> Bool{
@@ -229,13 +224,6 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
     }
     
     @IBAction func changeLyricsMode(sender:AnyObject?) {
-        let isVertical = !userDefaults.boolForKey(LyricsIsVerticalLyrics)
-        userDefaults.setObject(NSNumber(bool: isVertical), forKey: LyricsIsVerticalLyrics)
-        if isVertical {
-            lyricsModeMenuItem.title = NSLocalizedString("HORIZONTAL", comment: "")
-        } else {
-            lyricsModeMenuItem.title = NSLocalizedString("VERTICAL", comment: "")
-        }
         dispatch_async(dispatch_get_main_queue()) { () -> Void in
             self.lyricsWindow.reflash()
         }
@@ -423,6 +411,9 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
     }
     
     @IBAction func wrongLyrics(sender: AnyObject) {
+        let songID = currentSongID
+        let songTitle = currentSongTitle
+        let artist = currentArtist
         if !userDefaults.boolForKey(LyricsDisableAllAlert) {
             let alert: NSAlert = NSAlert()
             alert.messageText = NSLocalizedString("CONFIRM_MARK_WRONG", comment: "")
@@ -435,14 +426,29 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
             }
         }
         let wrongLyricsTag: String = NSLocalizedString("WRONG_LYRICS", comment: "")
-        lyricsArray.removeAll()
-        currentLyrics = nil
-        dispatch_async(dispatch_get_main_queue()) { () -> Void in
-            self.lyricsWindow.displayLyrics(nil, secondLyrics: nil)
+        if songID == currentSongID {
+            lyricsArray.removeAll()
+            currentLyrics = nil
+            dispatch_async(dispatch_get_main_queue()) { () -> Void in
+                self.lyricsWindow.displayLyrics(nil, secondLyrics: nil)
+            }
         }
-        saveLrcToLocal(wrongLyricsTag, songTitle: currentSongTitle, artist: currentArtist)
+        saveLrcToLocal(wrongLyricsTag, songTitle: songTitle, artist: artist)
     }
 
+    @IBAction func setAutoLayout(sender: AnyObject?) {
+        //Action triggers before NSUserDefaults, so, delay 0.1s 
+        if !userDefaults.boolForKey(LyricsUseAutoLayout) {
+            lyricsWindow.storeWindowSize()
+        }
+        lyricsWindow.performSelector("checkAutoLayout", withObject: nil, afterDelay: 0.1)
+    }
+    
+    @IBAction func lockLyricsFloatingWindow(sender: AnyObject?) {
+        lockFloatingWindow = !lockFloatingWindow
+        lyricsWindow.window?.ignoresMouseEvents = lockFloatingWindow
+    }
+    
     func setPresetByMenu(sender: AnyObject?) {
         if sender is NSMenuItem {
             let index: Int = presetMenuItem.submenu!.indexOfItem(sender as! NSMenuItem)
@@ -856,7 +862,6 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
     
     func handleExtenalLyricsEvent (n:NSNotification) {
         let userInfo = n.userInfo
-        NSLog("Recieved notification from %@",userInfo!["Sender"] as! String)
         
         //no playing track?
         if currentSongID == "" {
@@ -866,6 +871,7 @@ class AppController: NSObject, NSUserNotificationCenterDelegate {
             NSUserNotificationCenter.defaultUserNotificationCenter().deliverNotification(notification)
             return
         }
+        MessageWindowController.sharedMsgWindow.displayMessage(String(format: NSLocalizedString("RECIEVE_LYRICS", comment: ""), userInfo!["Sender"] as! String))
         //User lrc has the highest priority level
         lrcSourceHandleQueue.cancelAllOperations()
         lrcSourceHandleQueue.addOperationWithBlock { () -> Void in

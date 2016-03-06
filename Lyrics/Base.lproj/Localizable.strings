@@ -53,8 +53,6 @@
 // menu bar
 "HIGHER_LYRICS"="Higher Lyrics";
 "LOWER_LYRICS"="Lower Lyrics";
-"VERTICAL"="Switch to Vertical Lyrics(beta)";
-"HORIZONTAL"="Switch to Horizontal Lyrics";
 "EMPTY"="(Empty)";
 
 // Message Window
@@ -66,6 +64,7 @@
 "WROTE_TO_ITUNES"="Lyrics Has Wrote To iTunes";
 "COPYED_TO_PB"="Lyrics Has Copyed To Pasteboard";
 "NO_ARTWORK"="No Available Artwork";
+"RECIEVE_LYRICS"="Recieved Lyrics From %@";
 
 // About Window
 "EULA"="EULA";

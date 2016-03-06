@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="AppController" customModule="LyricsX" customModuleProvider="target">
@@ -10,7 +10,6 @@
                 <outlet property="delayMenuItem" destination="ENJ-eO-aCa" id="Ds4-Ab-aOj"/>
                 <outlet property="lyricsDelayView" destination="3Jx-vU-QNM" id="2fJ-DT-b0e"/>
                 <outlet property="lyricsHeightMenuItem" destination="3ij-j4-VJE" id="Q4F-Zg-dYg"/>
-                <outlet property="lyricsModeMenuItem" destination="WWe-QG-SLQ" id="7IY-DD-Jwn"/>
                 <outlet property="presetMenuItem" destination="2lK-fX-158" id="mBl-9H-PXZ"/>
                 <outlet property="statusBarMenu" destination="tTA-dl-Isx" id="TWf-gB-4JV"/>
             </connections>
@@ -46,13 +45,57 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="hYE-WS-gAK"/>
-                            <menuItem title="Switch to Vertical Lyrics (beta)" id="WWe-QG-SLQ">
+                            <menuItem title="Use Auto Layout" id="dzL-85-R9K">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="setAutoLayout:" target="-2" id="yuJ-93-R2r"/>
+                                    <binding destination="Ppe-ZY-ULn" name="value" keyPath="values.LyricsUseAutoLayout" id="8AK-pz-Gk1">
+                                        <dictionary key="options">
+                                            <bool key="NSValidatesImmediately" value="YES"/>
+                                        </dictionary>
+                                    </binding>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Use Constant Layout" id="YjJ-Pr-EK5">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="setAutoLayout:" target="-2" id="UYR-9Y-1kg"/>
+                                    <binding destination="Ppe-ZY-ULn" name="value" keyPath="values.LyricsUseAutoLayout" id="Xzt-Mf-utZ">
+                                        <dictionary key="options">
+                                            <bool key="NSValidatesImmediately" value="YES"/>
+                                            <string key="NSValueTransformerName">NSNegateBoolean</string>
+                                        </dictionary>
+                                    </binding>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="7FM-8f-Uuk"/>
+                            <menuItem title="Use Horizontal Lyrics" toolTip="Only Auto Layout" id="mdB-hQ-Zqo">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="changeLyricsMode:" target="-2" id="y9o-H0-R74"/>
+                                    <binding destination="Ppe-ZY-ULn" name="value" keyPath="values.LyricsIsVerticalLyrics" id="E5l-vg-BWW">
+                                        <dictionary key="options">
+                                            <bool key="NSValidatesImmediately" value="YES"/>
+                                            <string key="NSValueTransformerName">NSNegateBoolean</string>
+                                        </dictionary>
+                                    </binding>
+                                    <binding destination="Ppe-ZY-ULn" name="enabled" keyPath="values.LyricsUseAutoLayout" id="2EW-7T-6Ha"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Use Vertical Lyrics (beta)" toolTip="Only Auto Layout" id="WWe-QG-SLQ">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="changeLyricsMode:" target="-2" id="j5E-GF-gel"/>
+                                    <binding destination="Ppe-ZY-ULn" name="value" keyPath="values.LyricsIsVerticalLyrics" id="5rE-5V-yts">
+                                        <dictionary key="options">
+                                            <bool key="NSValidatesImmediately" value="YES"/>
+                                        </dictionary>
+                                    </binding>
+                                    <binding destination="Ppe-ZY-ULn" name="enabled" keyPath="values.LyricsUseAutoLayout" id="FON-If-HlC"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Lower Lyrics" id="3ij-j4-VJE">
+                            <menuItem isSeparatorItem="YES" id="wsZ-7A-xCk"/>
+                            <menuItem title="Lower Lyrics" toolTip="Needs Auto Layout and Horizontal mode enabled" id="3ij-j4-VJE">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="handleWorkSpaceChange:" target="-2" id="mqy-gU-MjL"/>
@@ -153,6 +196,7 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem isSeparatorItem="YES" id="6Qg-cW-Jgj"/>
                 <menuItem title="Export Artwork From iTunes..." id="Czc-V7-Kvq">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -163,6 +207,18 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="searchLyricsAndArtworks:" target="-2" id="6Uh-VR-sAm"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Lock Lyrics Floating Window" id="pjL-Kc-VQi">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="lockLyricsFloatingWindow:" target="-2" id="Ypj-1j-EUF"/>
+                        <binding destination="-2" name="value" keyPath="self.lockFloatingWindow" id="3CP-hu-gHH">
+                            <dictionary key="options">
+                                <bool key="NSValidatesImmediately" value="YES"/>
+                            </dictionary>
+                        </binding>
+                        <binding destination="Ppe-ZY-ULn" name="hidden" keyPath="values.LyricsUseAutoLayout" id="sje-Pq-fbY"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="jz7-1h-D1M"/>

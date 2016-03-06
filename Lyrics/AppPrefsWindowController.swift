@@ -294,7 +294,11 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
         // User shortcuts
         lyricsModeSwitchShortcut.associatedUserDefaultsKey = ShortcutLyricsModeSwitch
         MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutLyricsModeSwitch) { () -> Void in
-            appController.changeLyricsMode(nil)
+            let userDefaults = NSUserDefaults.standardUserDefaults()
+            userDefaults.setBool(!userDefaults.boolForKey(LyricsIsVerticalLyrics), forKey: LyricsIsVerticalLyrics)
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                DesktopLyricsController.sharedController.reflash()
+            })
         }
         desktopMenubarSwitchShortcut.associatedUserDefaultsKey = ShortcutDesktopMenubarSwitch
         MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutDesktopMenubarSwitch) { () -> Void in
@@ -414,6 +418,8 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
         }
         reflashFontAndColorPrefs()
         DesktopLyricsController.sharedController.handleAttributesUpdate()
+        DesktopLyricsController.sharedController.checkAutoLayout()
+        AppController.sharedController.lockFloatingWindow = false
         MessageWindowController.sharedMsgWindow.displayMessage(NSLocalizedString("PRESET_LOADED", comment: ""))
     }
     
@@ -427,8 +433,6 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
                 let settings: [String:AnyObject] = [
                     LyricsUseAutoLayout : userDefaults.objectForKey(LyricsUseAutoLayout)!,
                     LyricsHeightFromDockToLyrics : userDefaults.objectForKey(LyricsHeightFromDockToLyrics)!,
-                    LyricsConstToLeft : userDefaults.objectForKey(LyricsConstToLeft)!,
-                    LyricsConstToBottom : userDefaults.objectForKey(LyricsConstToBottom)!,
                     LyricsConstWidth : userDefaults.objectForKey(LyricsConstWidth)!,
                     LyricsConstHeight: userDefaults.objectForKey(LyricsConstHeight)!,
                     LyricsIsVerticalLyrics : userDefaults.objectForKey(LyricsIsVerticalLyrics)!,
