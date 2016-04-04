@@ -17,6 +17,7 @@
 		760A01901C01A37400015C62 /* Xiami.m in Sources */ = {isa = PBXBuildFile; fileRef = 760A018D1C01A37400015C62 /* Xiami.m */; };
 		760A01911C01A37400015C62 /* XMLParserForXiami.m in Sources */ = {isa = PBXBuildFile; fileRef = 760A018F1C01A37400015C62 /* XMLParserForXiami.m */; };
 		7622A7631C2A6757001250DD /* ClickView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7622A7621C2A6757001250DD /* ClickView.swift */; };
+		76251C6A1CA5336D00B9F049 /* LrcParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76251C691CA5336D00B9F049 /* LrcParser.swift */; };
 		7633A2FF1C202F9500D58360 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7633A2FE1C202F9500D58360 /* CoreGraphics.framework */; };
 		763763C81C292754003EB0B5 /* MASShortcut.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 763763C71C292754003EB0B5 /* MASShortcut.framework */; };
 		763763CC1C292957003EB0B5 /* MASShortcut.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 763763C71C292754003EB0B5 /* MASShortcut.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -61,6 +62,7 @@
 		76C511621BEC6F8F0095F510 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 76C511601BEC6F8F0095F510 /* MainMenu.xib */; };
 		76C511781BEC6FD50095F510 /* Macros.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C511771BEC6FD50095F510 /* Macros.swift */; };
 		76C590C61C7E050B004564D9 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76C590C51C7E050B004564D9 /* IOKit.framework */; };
+		76CE31821CA6BC8F00F1497B /* FilterString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76CE31811CA6BC8F00F1497B /* FilterString.swift */; };
 		76D060451C02B8D8000DA86C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76D060441C02B8D8000DA86C /* AppDelegate.swift */; };
 		76D060471C02B8D9000DA86C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 76D060461C02B8D9000DA86C /* Assets.xcassets */; };
 		76D0604A1C02B8D9000DA86C /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 76D060481C02B8D9000DA86C /* MainMenu.xib */; };
@@ -132,10 +134,9 @@
 		760A018E1C01A37400015C62 /* XMLParserForXiami.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLParserForXiami.h; sourceTree = "<group>"; };
 		760A018F1C01A37400015C62 /* XMLParserForXiami.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLParserForXiami.m; sourceTree = "<group>"; };
 		7622A7621C2A6757001250DD /* ClickView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClickView.swift; sourceTree = "<group>"; };
+		76251C691CA5336D00B9F049 /* LrcParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LrcParser.swift; sourceTree = "<group>"; };
 		7633A2FE1C202F9500D58360 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		763763C71C292754003EB0B5 /* MASShortcut.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MASShortcut.framework; sourceTree = "<group>"; };
-		7641E35C1C8AB3ED00222FC0 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
-		7641E35D1C8AB3F300222FC0 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
 		7642B9001BF45B0100D68FE9 /* LyricsLineModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LyricsLineModel.swift; sourceTree = "<group>"; };
 		7642B9031BF4709300D68FE9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/StatusMenu.xib; sourceTree = "<group>"; };
 		7642B9061BF488AB00D68FE9 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
@@ -178,6 +179,8 @@
 		768BCB331BF1C74400D6F5EB /* TSPhrases.ocd */ = {isa = PBXFileReference; lastKnownFileType = file; path = TSPhrases.ocd; sourceTree = "<group>"; };
 		768BCB341BF1C74400D6F5EB /* TWVariants.ocd */ = {isa = PBXFileReference; lastKnownFileType = file; path = TWVariants.ocd; sourceTree = "<group>"; };
 		768BCB421BF1C84B00D6F5EB /* ChineseConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChineseConverter.swift; sourceTree = "<group>"; };
+		768F942D1C9D3DC000FB77CF /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
+		768F942E1C9D3DCC00FB77CF /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/LyricsEditWindow.strings"; sourceTree = "<group>"; };
 		769AFC3F1C29A9C600215A6D /* MessageWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageWindowController.swift; sourceTree = "<group>"; };
 		76C046CF1BF2178B005053AC /* AppController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppController.swift; sourceTree = "<group>"; };
 		76C046D21BF21876005053AC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/Preferences.xib; sourceTree = "<group>"; };
@@ -191,6 +194,7 @@
 		76C511631BEC6F8F0095F510 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		76C511771BEC6FD50095F510 /* Macros.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Macros.swift; sourceTree = "<group>"; };
 		76C590C51C7E050B004564D9 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		76CE31811CA6BC8F00F1497B /* FilterString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterString.swift; sourceTree = "<group>"; };
 		76D060421C02B8D8000DA86C /* LyricsX Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LyricsX Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		76D060441C02B8D8000DA86C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		76D060461C02B8D9000DA86C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -405,6 +409,8 @@
 			isa = PBXGroup;
 			children = (
 				7642B9001BF45B0100D68FE9 /* LyricsLineModel.swift */,
+				76CE31811CA6BC8F00F1497B /* FilterString.swift */,
+				76251C691CA5336D00B9F049 /* LrcParser.swift */,
 				768BCB421BF1C84B00D6F5EB /* ChineseConverter.swift */,
 				76C511771BEC6FD50095F510 /* Macros.swift */,
 				764334911BF95ECF00C4B740 /* iTunesBridge.h */,
@@ -608,12 +614,14 @@
 				764B0A841C30D1600048419B /* XMLParserForQQ.swift in Sources */,
 				76C5115D1BEC6F8F0095F510 /* AppDelegate.swift in Sources */,
 				760A01901C01A37400015C62 /* Xiami.m in Sources */,
+				76CE31821CA6BC8F00F1497B /* FilterString.swift in Sources */,
 				764B0A831C30D1600048419B /* QQMusic.swift in Sources */,
 				766F03C51C049372003F4790 /* LyricsEditView.swift in Sources */,
 				760A01911C01A37400015C62 /* XMLParserForXiami.m in Sources */,
 				768ADD0C1C47980800567FE2 /* PresetListView.swift in Sources */,
 				76C0471A1BF2E335005053AC /* DBPrefsWindowController.m in Sources */,
 				76C046D01BF2178B005053AC /* AppController.swift in Sources */,
+				76251C6A1CA5336D00B9F049 /* LrcParser.swift in Sources */,
 				768ADD0E1C47A4AA00567FE2 /* ContextMenuDelegate.swift in Sources */,
 				760012291BFD9FAC00C7C1E4 /* LyricsEditWindowController.swift in Sources */,
 				7642B9011BF45B0100D68FE9 /* LyricsLineModel.swift in Sources */,
@@ -636,8 +644,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				7600121D1BFD9ECC00C7C1E4 /* Base */,
-				7641E35C1C8AB3ED00222FC0 /* zh-Hans */,
-				7641E35D1C8AB3F300222FC0 /* zh-Hant */,
+				768F942D1C9D3DC000FB77CF /* zh-Hans */,
+				768F942E1C9D3DCC00FB77CF /* zh-Hant */,
 			);
 			name = LyricsEditWindow.xib;
 			sourceTree = "<group>";

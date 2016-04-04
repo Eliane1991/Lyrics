@@ -57,6 +57,12 @@ let LyricsShadowRadius:String="LyricsShadowRadius"
 let LyricsBgHeightINCR:String="LyricsBgHeightINCR"
 let LyricsYOffset:String="LyricsYOffset"
 
+//Filter Preferences Defaults
+let LyricsDirectFilter:String="LyricsDirectFilter"
+let LyricsConditionalFilter:String="LyricsConditionalFilter"
+let LyricsEnableFilter:String="LyricsEnableFilter"
+let LyricsEnableSmartFilter:String="LyricsEnableSmartFilter"
+
 //Shortcut
 let ShortcutLyricsModeSwitch:String="ShortcutLyricsModeSwitch"
 let ShortcutDesktopMenubarSwitch:String="ShortcutDesktopMenubarSwitch"

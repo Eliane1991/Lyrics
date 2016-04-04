@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10116"/>
         <capability name="box content view" minToolsVersion="7.0"/>
     </dependencies>
     <objects>
@@ -25,7 +25,7 @@
             <rect key="screenRect" x="0.0" y="0.0" width="1280" height="777"/>
             <view key="contentView" id="iUk-dH-HqH" customClass="ClickView" customModule="LyricsX" customModuleProvider="target">
                 <rect key="frame" x="0.0" y="0.0" width="449" height="505"/>
-                <autoresizingMask key="autoresizingMask"/>
+                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <scrollView ambiguous="YES" misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fJl-Am-Wtk">
                         <rect key="frame" x="20" y="39" width="392" height="430"/>
@@ -104,6 +104,12 @@
                                                 <menuItem title="Only Bracket Content" id="HTt-hS-XVb"/>
                                                 <menuItem title="Exchange Bracket Content" id="yNY-4y-Xnn"/>
                                                 <menuItem title="Standardize" id="BzI-jq-pE8">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="Convert Bracket Content To SC" id="qS7-Sq-nME">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="Convert Bracket Content To TC" id="dcO-C1-sq5">
                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                 </menuItem>
                                             </items>

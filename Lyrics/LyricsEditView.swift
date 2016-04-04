@@ -8,6 +8,13 @@
 
 import Cocoa
 
+// http://stackoverflow.com/questions/36156712/the-selector-keyword-has-been-deprecated-in-future-versions-of-swift-how-can-i
+
+@objc protocol UndoActionRespondable {
+    func undo(sender: AnyObject)
+    func redo(sender: AnyObject)
+}
+
 class LyricsEditView: NSTextView {
 
     private let commandKey = NSEventModifierFlags.CommandKeyMask.rawValue
@@ -18,23 +25,23 @@ class LyricsEditView: NSTextView {
             if (event.modifierFlags.rawValue & NSEventModifierFlags.DeviceIndependentModifierFlagsMask.rawValue) == commandKey {
                 switch event.charactersIgnoringModifiers! {
                 case "x":
-                    if NSApp.sendAction(Selector("cut:"), to:nil, from:self) {
+                    if NSApp.sendAction(#selector(NSText.cut(_:)), to:nil, from:self) {
                         return true
                     }
                 case "c":
-                    if NSApp.sendAction(Selector("copy:"), to:nil, from:self) {
+                    if NSApp.sendAction(#selector(NSText.copy(_:)), to:nil, from:self) {
                         return true
                     }
                 case "v":
-                    if NSApp.sendAction(Selector("paste:"), to:nil, from:self) {
+                    if NSApp.sendAction(#selector(NSText.paste(_:)), to:nil, from:self) {
                         return true
                     }
                 case "z":
-                    if NSApp.sendAction(Selector("undo:"), to:nil, from:self) {
+                    if NSApp.sendAction(#selector(UndoActionRespondable.undo(_:)), to:nil, from:self) {
                         return true
                     }
                 case "a":
-                    if NSApp.sendAction(Selector("selectAll:"), to:nil, from:self) {
+                    if NSApp.sendAction(#selector(NSResponder.selectAll(_:)), to:nil, from:self) {
                         return true
                     }
                 case "w":
@@ -46,7 +53,7 @@ class LyricsEditView: NSTextView {
             }
             else if (event.modifierFlags.rawValue & NSEventModifierFlags.DeviceIndependentModifierFlagsMask.rawValue) == commandShiftKey {
                 if event.charactersIgnoringModifiers == "Z" {
-                    if NSApp.sendAction(Selector("redo:"), to:nil, from:self) { return true }
+                    if NSApp.sendAction(#selector(UndoActionRespondable.redo(_:)), to:nil, from:self) { return true }
                 }
             }
         }

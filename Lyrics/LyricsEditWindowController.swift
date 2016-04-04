@@ -76,50 +76,15 @@ class LyricsEditWindowController: NSWindowController {
         if leftBracket.stringValue.characters.count != 1 {
             return
         }
-        var lyricsLines = [LyricsLineModel]()
         var newLyrics = String()
-        let regex: NSRegularExpression
-        do {
-            regex = try NSRegularExpression(pattern: "\\[\\d+:\\d+.\\d+\\]|\\[\\d+:\\d+\\]", options: [])
-        } catch let theError as NSError {
-            NSLog("%@", theError.localizedDescription)
-            return
+        let parser = LrcParser()
+        parser.regularParse(textView.string!)
+        for str in parser.idTags {
+            newLyrics.appendContentsOf(str + "\n")
         }
-        let newLineCharSet: NSCharacterSet = NSCharacterSet.newlineCharacterSet()
-        let lrcParagraphs: [String] = textView.string!.componentsSeparatedByCharactersInSet(newLineCharSet)
-        
-        for str in lrcParagraphs {
-            let timeTagsMatched: [NSTextCheckingResult] = regex.matchesInString(str, options: [], range: NSMakeRange(0, str.characters.count))
-            if timeTagsMatched.count > 0 {
-                let index: Int = timeTagsMatched.last!.range.location + timeTagsMatched.last!.range.length
-                var lyricsSentence: String = str.substringFromIndex(str.startIndex.advancedBy(index))
-                lyricsSentence = operationToString(lyricsSentence)
-                for result in timeTagsMatched {
-                    let matchedRange: NSRange = result.range
-                    let lrcLine: LyricsLineModel = LyricsLineModel()
-                    lrcLine.lyricsSentence = lyricsSentence
-                    lrcLine.setMsecPositionWithTimeTag((str as NSString).substringWithRange(matchedRange))
-                    let currentCount: Int = lyricsLines.count
-                    var j: Int
-                    for j=0; j<currentCount; ++j {
-                        if lrcLine.msecPosition < lyricsLines[j].msecPosition {
-                            lyricsLines.insert(lrcLine, atIndex: j)
-                            break
-                        }
-                    }
-                    if j == currentCount {
-                        lyricsLines.append(lrcLine)
-                    }
-                }
-            }
-            else {
-                if str.stringByReplacingOccurrencesOfString(" ", withString: "") != "" {
-                    newLyrics.appendContentsOf(str + "\n")
-                }
-            }
-        }
-        for lrc in lyricsLines {
-            newLyrics.appendContentsOf(lrc.timeTag + lrc.lyricsSentence + "\n")
+        newLyrics.appendContentsOf("[offset:\(parser.timeDly)]\n")
+        for line in parser.lyrics {
+            newLyrics.appendContentsOf(line.timeTag + operationToString(line.lyricsSentence) + "\n")
         }
         self.textView.string = newLyrics
     }
@@ -155,6 +120,18 @@ class LyricsEditWindowController: NSWindowController {
                 let formmerPart = (str as NSString).substringToIndex(leftBracketIdx)
                 let latterPart = (str as NSString).substringWithRange(NSMakeRange(loc, len))
                 return formmerPart + "【" + latterPart + "】"
+            case 4:
+                let loc = leftBracketIdx + 1
+                let len = rightBracketIdx - loc
+                let formmerPart = (str as NSString).substringToIndex(leftBracketIdx)
+                let latterPart = convertToSC((str as NSString).substringWithRange(NSMakeRange(loc, len)))
+                return formmerPart + "【" + latterPart + "】"
+            case 5:
+                let loc = leftBracketIdx + 1
+                let len = rightBracketIdx - loc
+                let formmerPart = (str as NSString).substringToIndex(leftBracketIdx)
+                let latterPart = convertToTC((str as NSString).substringWithRange(NSMakeRange(loc, len)))
+                return formmerPart + leftBracket.stringValue + latterPart + rightBracket.stringValue
             default:
                 return str
             }
@@ -206,7 +183,7 @@ class LyricsEditWindowController: NSWindowController {
         while index > -1 {
             let char: String = str.substringWithRange(NSMakeRange(index, 1))
             if char == " " {
-                index--
+                index -= 1
                 continue
             }
             else if char == rightBracket.stringValue {
@@ -233,7 +210,7 @@ class LyricsEditWindowController: NSWindowController {
                 }
                 stack.removeLast()
             }
-            index++
+            index += 1
         }
         if stack.count == 1 {
             return stack.first!
