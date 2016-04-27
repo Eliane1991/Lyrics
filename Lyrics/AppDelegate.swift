@@ -15,10 +15,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         let userSavingPath: NSString = NSSearchPathForDirectoriesInDomains(.DownloadsDirectory, [.UserDomainMask], true).first! 
         
-        let directFilter = ["作詞","作词","作曲","編曲","编曲","収録","収录","歌手","歌曲","制作","歌词","歌詞","製作","翻譯","翻译","插曲","插入歌","lrc","qq","アニメ","pcゲーム","cv","op1","op2","opテマ","ed1","ed2","edテマ","lyricsby","charactersong","soundtrack"]
-        let conditionalFilter = ["by","歌","唄","曲","作","唱","詞","词","編","编"]
+        let directFilterData = generateDirectFilterData()
+        let conditionalFilterData = generateConditionalFilterData()
         
-        let userDefaults: [String:AnyObject] = [
+        let registerDefaultsDic: [String:AnyObject] = [
             //Menu
             LyricsDesktopLyricsEnabled : NSNumber(bool: true),
             LyricsMenuBarLyricsEnabled : NSNumber(bool: false),
@@ -60,13 +60,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             LyricsYOffset : NSNumber(float: 0),
             
             //Filter Preferences Defaults
-            LyricsDirectFilter : directFilter,
-            LyricsConditionalFilter : conditionalFilter,
+            LyricsDirectFilter : directFilterData,
+            LyricsConditionalFilter : conditionalFilterData,
             LyricsEnableFilter : NSNumber(bool: false),
             LyricsEnableSmartFilter : NSNumber(bool: true)
         ]
         
-        NSUserDefaults.standardUserDefaults().registerDefaults(userDefaults)
+        let userDefaults = NSUserDefaults.standardUserDefaults()
+        //早期版本的过滤数据是采用[String]保存，新版本使用NSData，如果不是NSData则重置
+        userDefaults.registerDefaults(registerDefaultsDic)
+        if !userDefaults.objectForKey(LyricsDirectFilter)!.isKindOfClass(NSData) {
+            userDefaults.removeObjectForKey(LyricsDirectFilter)
+        }
+        if !userDefaults.objectForKey(LyricsConditionalFilter)!.isKindOfClass(NSData) {
+            userDefaults.removeObjectForKey(LyricsConditionalFilter)
+        }
         
         NSColorPanel.sharedColorPanel().showsAlpha = true
         
@@ -87,7 +95,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         //Check if login item hasn't be enabled
         let identifier: String = "Eru.LyricsX-Helper"
-        if NSUserDefaults.standardUserDefaults().boolForKey(LyricsAutoLaunches) {
+        if userDefaults.boolForKey(LyricsAutoLaunches) {
             if !SMLoginItemSetEnabled(identifier, true) {
                 NSLog("Failed to enable login item")
             }
@@ -125,5 +133,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func generateDirectFilterData() -> NSData {
+        let caseInsensitiveStr = ["作詞","作词","作曲","編曲","编曲","収録","收录","演唱","歌手","歌曲","制作","製作","歌词","歌詞","翻譯","翻译","插曲","插入歌","主题歌","主題歌","片頭曲","片头曲","片尾曲","Lrc","QQ","アニメ","CV","LyricsBy","CharacterSong","SoundTrack"]
+        let caseSensitiveStr = ["PC","OP","ED","OVA","BGM"]
+        var directFilter = [FilterString]()
+        for str in caseInsensitiveStr {
+            directFilter.append(FilterString(keyword: str, caseSensitive: false))
+        }
+        for str in caseSensitiveStr {
+            directFilter.append(FilterString(keyword: str, caseSensitive: true))
+        }
+        return NSKeyedArchiver.archivedDataWithRootObject(directFilter)
+    }
+    
+    func generateConditionalFilterData() -> NSData {
+        let caseInsensitiveStr = ["by","歌","唄","曲","作","唱","詞","词","編","编"]
+        var conditionalFilter = [FilterString]()
+        for str in caseInsensitiveStr {
+            conditionalFilter.append(FilterString(keyword: str, caseSensitive: false))
+        }
+        return NSKeyedArchiver.archivedDataWithRootObject(conditionalFilter)
+    }
 }
 
