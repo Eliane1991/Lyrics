@@ -36,6 +36,8 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
     var bgHeightIncreasement: Float = 0
     var lyricsYOffset: Float = 0
     //Shortcuts
+    @IBOutlet private weak var offsetIncrShortcut: MASShortcutView!
+    @IBOutlet private weak var offsetDecrShortcut: MASShortcutView!
     @IBOutlet private weak var lyricsModeSwitchShortcut: MASShortcutView!
     @IBOutlet private weak var desktopMenubarSwitchShortcut: MASShortcutView!
     @IBOutlet private weak var lrcSeekerShortcut: MASShortcutView!
@@ -73,6 +75,8 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
         savingPathPopUp.itemAtIndex(1)?.title = (userSavingPath as NSString).lastPathComponent
         
         reflashFontAndColorPrefs()
+        bindShortcutViewToKey()
+        reflashPreset(nil)
         loadFilter()
     }
     
@@ -305,50 +309,16 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
     
 // MARK: - Shortcut Prefs
     
-    func setupShortcuts() {
-        let appController = AppController.sharedController
-        // User shortcuts
+    func bindShortcutViewToKey() {
+        offsetIncrShortcut.associatedUserDefaultsKey = ShortcutOffsetIncr
+        offsetDecrShortcut.associatedUserDefaultsKey = ShortcutOffsetDecr
         lyricsModeSwitchShortcut.associatedUserDefaultsKey = ShortcutLyricsModeSwitch
-        MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutLyricsModeSwitch) { () -> Void in
-            let userDefaults = NSUserDefaults.standardUserDefaults()
-            userDefaults.setBool(!userDefaults.boolForKey(LyricsIsVerticalLyrics), forKey: LyricsIsVerticalLyrics)
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                DesktopLyricsController.sharedController.reflash()
-            })
-        }
         desktopMenubarSwitchShortcut.associatedUserDefaultsKey = ShortcutDesktopMenubarSwitch
-        MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutDesktopMenubarSwitch) { () -> Void in
-            appController.switchDesktopMenuBarMode()
-        }
         lrcSeekerShortcut.associatedUserDefaultsKey = ShortcutOpenLrcSeeker
-        MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutOpenLrcSeeker) { () -> Void in
-            appController.searchLyricsAndArtworks(nil)
-        }
         copyLrcToPbShortcut.associatedUserDefaultsKey = ShortcutCopyLrcToPb
-        MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutCopyLrcToPb) { () -> Void in
-            appController.copyLyricsToPb(nil)
-        }
         editLrcShortcut.associatedUserDefaultsKey = ShortcutEditLrc
-        MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutEditLrc) { () -> Void in
-            appController.editLyrics(nil)
-        }
         makeLrcShortcut.associatedUserDefaultsKey = ShortcutMakeLrc
-        MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutMakeLrc) { () -> Void in
-            appController.makeLrc(nil)
-        }
         writeLrcToiTunesShortcut.associatedUserDefaultsKey = ShortcutWriteLrcToiTunes
-        MASShortcutBinder.sharedBinder().bindShortcutWithDefaultsKey(ShortcutWriteLrcToiTunes) { () -> Void in
-            appController.writeLyricsToiTunes(nil)
-        }
-        // Hard-Coded shortcuts
-        let offsetIncr: MASShortcut = MASShortcut(keyCode: UInt(kVK_ANSI_Equal), modifierFlags: NSEventModifierFlags.CommandKeyMask.rawValue | NSEventModifierFlags.AlternateKeyMask.rawValue)
-        MASShortcutMonitor.sharedMonitor().registerShortcut(offsetIncr) { () -> Void in
-            appController.increaseTimeDly()
-        }
-        let offsetDecr: MASShortcut = MASShortcut(keyCode: UInt(kVK_ANSI_Minus), modifierFlags: NSEventModifierFlags.CommandKeyMask.rawValue | NSEventModifierFlags.AlternateKeyMask.rawValue)
-        MASShortcutMonitor.sharedMonitor().registerShortcut(offsetDecr) { () -> Void in
-            appController.decreaseTimeDly()
-        }
     }
     
     private func endRecordShortcut() {
@@ -605,8 +575,8 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
     
     func loadFilter() {
         let userDefault = NSUserDefaults.standardUserDefaults()
-        let directFilterData = userDefault.dataForKey(LyricsDirectFilter)!
-        let conditionalFilterData = userDefault.dataForKey(LyricsConditionalFilter)!
+        let directFilterData = userDefault.dataForKey(LyricsDirectFilterKey)!
+        let conditionalFilterData = userDefault.dataForKey(LyricsConditionalFilterKey)!
         directFilter = NSKeyedUnarchiver.unarchiveObjectWithData(directFilterData) as! [FilterString]
         conditionalFilter = NSKeyedUnarchiver.unarchiveObjectWithData(conditionalFilterData) as! [FilterString]
     }
@@ -636,8 +606,8 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
         alert.beginSheetModalForWindow(self.window!) { (response) in
             if response == NSAlertFirstButtonReturn {
                 let userDefaults = NSUserDefaults.standardUserDefaults()
-                userDefaults.removeObjectForKey(LyricsDirectFilter)
-                userDefaults.removeObjectForKey(LyricsConditionalFilter)
+                userDefaults.removeObjectForKey(LyricsDirectFilterKey)
+                userDefaults.removeObjectForKey(LyricsConditionalFilterKey)
                 self.directFilter.removeAll()
                 self.conditionalFilter.removeAll()
                 self.loadFilter()
@@ -661,8 +631,8 @@ class AppPrefsWindowController: DBPrefsWindowController, NSWindowDelegate, Conte
         let userDefaults = NSUserDefaults.standardUserDefaults()
         let directFilterData = NSKeyedArchiver.archivedDataWithRootObject(directFilter)
         let conditionalFilterData = NSKeyedArchiver.archivedDataWithRootObject(conditionalFilter)
-        userDefaults.setObject(directFilterData, forKey: LyricsDirectFilter)
-        userDefaults.setObject(conditionalFilterData, forKey: LyricsConditionalFilter)
+        userDefaults.setObject(directFilterData, forKey: LyricsDirectFilterKey)
+        userDefaults.setObject(conditionalFilterData, forKey: LyricsConditionalFilterKey)
     }
     
     @IBAction func showHelp(sender: NSButton) {

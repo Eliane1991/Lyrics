@@ -15,6 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         let userSavingPath: NSString = NSSearchPathForDirectoriesInDomains(.DownloadsDirectory, [.UserDomainMask], true).first! 
         
+        // Filter
         let directFilterData = generateDirectFilterData()
         let conditionalFilterData = generateConditionalFilterData()
         
@@ -50,33 +51,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             //Font and Color Preferences Defaults
             LyricsFontName : "HannotateSC-W7",
-            LyricsFontSize : NSNumber(float: 36),
+            LyricsFontSize : NSNumber(float: 26),
             LyricsShadowModeEnable : NSNumber(bool: true),
             LyricsTextColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor.whiteColor()),
             LyricsBackgroundColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor(calibratedWhite: 0, alpha: 0.5)),
             LyricsShadowColor : NSKeyedArchiver.archivedDataWithRootObject(NSColor.orangeColor()),
-            LyricsShadowRadius : NSNumber(float: 4),
+            LyricsShadowRadius : NSNumber(float: 2),
             LyricsBgHeightINCR : NSNumber(float: 0),
             LyricsYOffset : NSNumber(float: 0),
             
             //Filter Preferences Defaults
-            LyricsDirectFilter : directFilterData,
-            LyricsConditionalFilter : conditionalFilterData,
+            LyricsDirectFilterKey : directFilterData,
+            LyricsConditionalFilterKey : conditionalFilterData,
             LyricsEnableFilter : NSNumber(bool: false),
             LyricsEnableSmartFilter : NSNumber(bool: true)
         ]
         
         let userDefaults = NSUserDefaults.standardUserDefaults()
-        //早期版本的过滤数据是采用[String]保存，新版本使用NSData，如果不是NSData则重置
+
         userDefaults.registerDefaults(registerDefaultsDic)
-        if !userDefaults.objectForKey(LyricsDirectFilter)!.isKindOfClass(NSData) {
-            userDefaults.removeObjectForKey(LyricsDirectFilter)
-        }
-        if !userDefaults.objectForKey(LyricsConditionalFilter)!.isKindOfClass(NSData) {
-            userDefaults.removeObjectForKey(LyricsConditionalFilter)
-        }
-        
-        NSColorPanel.sharedColorPanel().showsAlpha = true
         
         let lyricsXHelpers = NSRunningApplication.runningApplicationsWithBundleIdentifier("Eru.LyricsX-Helper")
         for helper in lyricsXHelpers {
@@ -86,11 +79,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Force singleton to init
         AppController.sharedController
         
-        // Force Prefs to load and setup shortcuts,etc
+        // Force Prefs to load presets
         let prefs = AppPrefsWindowController.sharedPrefsWindowController
         prefs.showWindow(nil)
-        prefs.setupShortcuts()
-        prefs.reflashPreset(nil)
         prefs.window?.close()
         
         //Check if login item hasn't be enabled
@@ -100,6 +91,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 NSLog("Failed to enable login item")
             }
         }
+        
+        NSColorPanel.sharedColorPanel().showsAlpha = true
     }
     
     func applicationWillTerminate(aNotification: NSNotification) {
@@ -133,8 +126,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func generateDirectFilterData() -> NSData {
-        let caseInsensitiveStr = ["作詞","作词","作曲","編曲","编曲","収録","收录","演唱","歌手","歌曲","制作","製作","歌词","歌詞","翻譯","翻译","插曲","插入歌","主题歌","主題歌","片頭曲","片头曲","片尾曲","Lrc","QQ","アニメ","CV","LyricsBy","CharacterSong","SoundTrack"]
+    private func generateDirectFilterData() -> NSData {
+        let caseInsensitiveStr = ["作詞","作词","作曲","編曲","编曲","収録","收录","演唱","歌手","歌曲","制作","製作","歌词","歌詞","翻譯","翻译","插曲","插入歌","主题歌","主題歌","片頭曲","片头曲","片尾曲","Lrc","QQ","アニメ","CV","LyricsBy","CharacterSong","InsertSong","SoundTrack"]
         let caseSensitiveStr = ["PC","OP","ED","OVA","BGM"]
         var directFilter = [FilterString]()
         for str in caseInsensitiveStr {
@@ -146,7 +139,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return NSKeyedArchiver.archivedDataWithRootObject(directFilter)
     }
     
-    func generateConditionalFilterData() -> NSData {
+    private func generateConditionalFilterData() -> NSData {
         let caseInsensitiveStr = ["by","歌","唄","曲","作","唱","詞","词","編","编"]
         var conditionalFilter = [FilterString]()
         for str in caseInsensitiveStr {
